@@ -1,0 +1,32 @@
+# 核心忽略：Library 和临时文件
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/Logs/
+/UserSettings/
+
+# 忽略 Visual Studio / VS Code 生成的项目文件
+/*.csproj
+/*.unityproj
+/*.sln
+/*.suo
+/*.user
+/*.userprefs
+/*.pidb
+/*.booproj
+/.vs/
+/.vscode/
+
+# 忽略系统文件
+.DS_Store
+Thumbs.db
+
+# 忽略自动生成的 Rider 文件夹
+.idea/
+
+# 忽略打包产物
+*.apk
+*.aab
+*.unitypackage
