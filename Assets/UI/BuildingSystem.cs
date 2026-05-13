@@ -19,8 +19,6 @@ public class BuildingSystem : MonoBehaviour
         // 简单单例
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
-
-        
     }
     private void Start()
     {
@@ -139,9 +137,14 @@ public class BuildingSystem : MonoBehaviour
             return;
         }
 
+        if (!ResourceSystem.TryBuild(selectedPrefab.foodCost, selectedPrefab.woodCost,selectedPrefab.stoneCost))
+        {
+            Debug.Log("资源不足！");
+            return;
+        }
         // 实例化真实建筑
         GameObject newBuilding = Instantiate(selectedPrefab.prefab, ghostBuilding.transform.position, ghostBuilding.transform.rotation);
-        ResourceSystem.TryBuild(selectedPrefab.foodCost, selectedPrefab.woodCost,selectedPrefab.stoneCost);
+        
         // 调用建筑的初始化方法（假设建筑上有 IBuilding 接口）
         IBuilding buildingComp = newBuilding.GetComponent<IBuilding>();
         if (buildingComp != null)
@@ -150,7 +153,7 @@ public class BuildingSystem : MonoBehaviour
         }
 
         // 建造成功，退出建造模式
-        CancelBuilding();
+        //CancelBuilding();
     }
 
     /// <summary>

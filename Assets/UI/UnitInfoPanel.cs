@@ -136,7 +136,7 @@ public class UnitInfoPanel : MonoBehaviour
             occupyGridText.text = "’º¡Ï";
         }   
     }
-    public void UpdateCurrentTarget(IFactionMember target)
+    public void UpdateCurrentTarget(IHasPosition target)
     {
         if(target as MonoBehaviour == null)
         {

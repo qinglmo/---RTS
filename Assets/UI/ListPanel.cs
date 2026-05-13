@@ -24,11 +24,13 @@ public class ListPanel : MonoBehaviour,IListPanel
     [Tooltip("按钮生成位置的父物体（通常就是脚本所在对象，可留空自动使用 transform）")]
     [SerializeField] private Transform contentParent;
 
+    //默认事件列表，调用方只需要传递按钮名字，维护顺序即可。
+    public Action<int> OnButtonSelected;
     // 可选：当单位按钮被点击时触发的事件（参数为单位名字）
-    public System.Action<int> OnUnitPrefabSelected;
+    public System.Action<UnitSpawnData> OnUnitPrefabSelected;
     //当实例单位被点击时触发的事件
     public System.Action<BaseUnit> OnUnitSelected { get; set; }
-    public  Action<GameObject> OnPrefabSelected;
+    
     public Action<BuildingData> OnBuildingPrefabSelected;
 
     private void Awake()
@@ -107,7 +109,7 @@ public class ListPanel : MonoBehaviour,IListPanel
     /// 接收单位名称列表并刷新 UI
     /// </summary>
     /// <param name="unitNames">单位名称列表</param>
-    public void SetPrefabList_Index(List<GameObject> Units)
+    public void SetUnitPrefabList(List<UnitSpawnData> Units)
     {
         ShowPanel();
         // 清除当前所有生成的按钮
@@ -116,13 +118,12 @@ public class ListPanel : MonoBehaviour,IListPanel
         // 如果没有列表或列表为空，直接返回
         if (Units == null || Units.Count == 0)
             return;
-        int index = 0;
         // 遍历名称列表，生成对应按钮
         foreach (var unit in Units)
         {
 
             // 避免闭包陷阱，保存当前循环的值
-            int currentIndex = index;
+            UnitSpawnData unitSpawn = unit;
 
             // 实例化按钮并设置父物体
             GameObject newButton = Instantiate(ButtonPrefab, contentParent);
@@ -130,7 +131,7 @@ public class ListPanel : MonoBehaviour,IListPanel
             // 设置按钮上的文本
             Text textComp = newButton.GetComponentInChildren<Text>();
             if (textComp != null)
-                textComp.text = unit.name;
+                textComp.text = unit.prefab.name;
             else
                 Debug.LogWarning("按钮预制体缺少 Text 组件，无法显示单位名称。");
 
@@ -138,9 +139,8 @@ public class ListPanel : MonoBehaviour,IListPanel
             Button btn = newButton.GetComponent<Button>();
             if (btn != null)
             {
-                btn.onClick.AddListener(() => OnUnitButtonClicked(currentIndex));
+                btn.onClick.AddListener(() => OnUnitButtonClicked(unitSpawn));
             }
-            index++;
         }
     }
     /// <summary>
@@ -180,20 +180,20 @@ public class ListPanel : MonoBehaviour,IListPanel
             }
         }
     }
-    public void SetPrefabsList(List<GameObject> prefabs)
+    public void SetButtonList(List<string> buttons)
     {
         // 清除当前所有生成的按钮
         ClearButtons();
 
         // 如果列表为空，直接返回
-        if (prefabs == null || prefabs.Count == 0)
+        if (buttons == null || buttons.Count == 0)
             return;
-
-        // 遍历建筑列表，生成对应按钮
-        foreach (var prefab in prefabs)
+        int index = 0;
+        // 生成对应按钮
+        foreach (var button in buttons)
         {
             // 保存当前建筑（避免闭包陷阱）
-            GameObject current = prefab;
+            int currentIndex = index;
 
             // 实例化按钮并设置父物体
             GameObject newButton = Instantiate(ButtonPrefab, contentParent);
@@ -201,7 +201,7 @@ public class ListPanel : MonoBehaviour,IListPanel
             // 设置按钮上的文本
             Text textComp = newButton.GetComponentInChildren<Text>();
             if (textComp != null)
-                textComp.text = current.name;
+                textComp.text = button;
             else
                 Debug.LogWarning("按钮预制体缺少 Text 组件，无法显示建筑名称。");
 
@@ -209,8 +209,9 @@ public class ListPanel : MonoBehaviour,IListPanel
             Button btn = newButton.GetComponent<Button>();
             if (btn != null)
             {
-                btn.onClick.AddListener(() => OnPrefabButtonClicked(current));
+                btn.onClick.AddListener(() => OnPrefabButtonClicked(currentIndex));
             }
+            index++;
         }
     }
     public void SetBuildingPrefabsList(List<BuildingData> prefabs)
@@ -258,7 +259,7 @@ public class ListPanel : MonoBehaviour,IListPanel
             Destroy(child.gameObject);
         }
         //清空所有事件
-        OnPrefabSelected = null;
+        OnButtonSelected = null;
         OnUnitPrefabSelected = null;
         OnUnitSelected = null;
         OnBuildingPrefabSelected=null;
@@ -268,13 +269,13 @@ public class ListPanel : MonoBehaviour,IListPanel
     /// 按钮点击时的内部处理方法
     /// </summary>
     /// <param name="unitName">被点击的单位名称</param>
-    private void OnUnitButtonClicked(int index)
+    private void OnUnitButtonClicked(UnitSpawnData unitPrefab)
     {
         // 触发外部注册的事件
-        OnUnitPrefabSelected?.Invoke(index);
+        OnUnitPrefabSelected?.Invoke(unitPrefab);
 
         // 可选的默认行为（例如打印日志）
-        Debug.Log($"单位 [{index}] 被选中");
+        Debug.Log($"单位 [{unitPrefab.unitName}] 被选中");
     }
     private void OnUnitButtonClicked(BaseUnit unit)
     {
@@ -285,9 +286,9 @@ public class ListPanel : MonoBehaviour,IListPanel
         Debug.Log($"单位 [{unit}] 被选中");
     }
 
-    private void OnPrefabButtonClicked(GameObject prefab)
+    private void OnPrefabButtonClicked(int index)
     {
-        OnPrefabSelected?.Invoke(prefab);
+        OnButtonSelected?.Invoke(index);
     }
     private void OnBuildingPrefabButtonClicked(BuildingData prefab)
     {

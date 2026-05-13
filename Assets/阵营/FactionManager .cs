@@ -19,11 +19,14 @@ public class FactionManager : MonoBehaviour
     // 快速查找的数据结构：字典嵌套字典
     private Dictionary<Faction, Dictionary<UnitType, FactionUnitOverride>> overrideDict;
 
-    public static Dictionary<Faction, Dictionary<Vector2Int, BaseUnit>> FactionOccupyCells
-    = new Dictionary<Faction, Dictionary<Vector2Int, BaseUnit>>();
+    public static Dictionary<Faction, Dictionary<Vector2Int, IFactionMember>> FactionOccupyCells
+    = new Dictionary<Faction, Dictionary<Vector2Int, IFactionMember>>();
     public static Dictionary<Faction, List< BuildingHospital>> FactionHospitals
     = new Dictionary<Faction, List<BuildingHospital>>();
+    public BuildingMainSettlement mainSettlement;
 
+    public Dictionary<Faction,List<BaseUnit>> FactionUnits//通过订阅全局单位出现消失事件，维护不同阵营的单位列表。
+    = new Dictionary<Faction, List<BaseUnit>>();
 
     [System.Serializable]
     public class FactionUnitOverrideEntry
@@ -58,11 +61,29 @@ public class FactionManager : MonoBehaviour
         
         foreach(var faction in factions)
         {
-            FactionOccupyCells[faction] = new Dictionary<Vector2Int, BaseUnit>();
+            FactionOccupyCells[faction] = new Dictionary<Vector2Int, IFactionMember>();
             FactionHospitals[faction] = new List<BuildingHospital>();
         }
+        EventBus_Unit.OnUnitActivated += AddUnit;
+        EventBus_Unit.OnUnitDeactivated += RemoveUnit;
     }
-
+    private void OnDestroy()
+    {
+        EventBus_Unit.OnUnitActivated -= AddUnit;
+        EventBus_Unit.OnUnitDeactivated -= RemoveUnit;
+    }
+    
+    private void AddUnit(BaseUnit unit)
+    {
+        if (!FactionUnits.ContainsKey(unit.Faction))
+            FactionUnits[unit.Faction] = new List<BaseUnit>();
+        FactionUnits[unit.Faction].Add(unit);
+    }
+    private void RemoveUnit(BaseUnit unit)
+    {
+        if (FactionUnits.TryGetValue(unit.Faction, out var units))
+            units.Remove(unit);
+    }
     private void BuildOverrideDictionary()
     {
         overrideDict = new Dictionary<Faction, Dictionary<UnitType, FactionUnitOverride>>();

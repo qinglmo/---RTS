@@ -30,3 +30,6 @@ Thumbs.db
 *.apk
 *.aab
 *.unitypackage
+
+.comate/
+.vsconfig

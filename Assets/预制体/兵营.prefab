@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4811251873903462987}
   - component: {fileID: 9089477226073496749}
   - component: {fileID: 7832439011511654023}
+  - component: {fileID: -8905490423746685121}
   m_Layer: 7
   m_Name: "\u5175\u8425"
   m_TagString: Untagged
@@ -102,16 +103,6 @@ MonoBehaviour:
   faction: {fileID: 11400000, guid: 4eca277a07e8e5143b3cae5ab8e1a70a, type: 2}
   maxHp: 100
   hp: 100
-  units:
-  - unitName: "\u8FD1\u6218"
-    prefab: {fileID: 2652715914459273330, guid: bf457783efa02194ea3217fda92005f8, type: 3}
-    health: 10
-    attack: 2
-  - unitName: "\u8FDC\u7A0B"
-    prefab: {fileID: 7742949438478305316, guid: c4229e3e980e09d4995614e6f659f1b2, type: 3}
-    health: 10
-    attack: 1
-  ID: 0
 --- !u!61 &9089477226073496749
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -184,3 +175,19 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &-8905490423746685121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5234960224976816081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 873a3ca9054775f4bb050892043c4a64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  units:
+  - {fileID: 11400000, guid: b626572ec67641a48b518bea2e1fdf09, type: 2}
+  - {fileID: 11400000, guid: 4450c58abc6da1048811b9699abefb42, type: 2}
+  ID: 0

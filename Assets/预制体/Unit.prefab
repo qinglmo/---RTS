@@ -27,11 +27,9 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 3304643268654456216}
-  - {fileID: 1922835103781349050}
+  m_Children: []
   m_Father: {fileID: 1379606418424311374}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &6230446610387375011
@@ -75,7 +73,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 3
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 3625043607559282579, guid: 19fb86013d8c24d6cb8410c0aadf30fa, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -116,7 +114,7 @@ Transform:
   m_LocalScale: {x: 0.2, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 4506195588132372675}
+  m_Father: {fileID: 1379606418424311374}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &3635251497060188103
 SpriteRenderer:
@@ -206,6 +204,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4506195588132372675}
+  - {fileID: 3304643268654456216}
+  - {fileID: 1922835103781349050}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3197729597263113696
@@ -217,26 +217,31 @@ MonoBehaviour:
   m_GameObject: {fileID: 7742949438478305316}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cfb04a9f8f37b2a45b4fb590fcf83839, type: 3}
+  m_Script: {fileID: 11500000, guid: 512a3b7d6d5ae2e439b0491352e5419d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   faction: {fileID: 0}
   movement: {fileID: 0}
   attributes:
-    rid: 5517520050404196353
+    rid: 5517520329517826067
   detector: {fileID: 0}
   unitVisualEffect: {fileID: 0}
   UnitCommander: {fileID: 0}
   mainState: {fileID: 0}
-  selectSprite: {fileID: 7611960711658022004}
-  StateSprite: {fileID: 3635251497060188103}
+  behaviorTreeManager: {fileID: 0}
+  attackRange: 5
+  selectSprite: {fileID: 0}
+  StateSprite: {fileID: 0}
+  chaseRange_Advance: 5
+  chaseRange_Normal: 20
+  chaseRange_Current: 0
   commandAttackTarget: {fileID: 0}
   bulletPrefab: {fileID: 4193395996005536175, guid: 8617f0de2dcdc6c4abe39dfedf51c096, type: 3}
   firePoint: {fileID: 0}
   references:
     version: 2
     RefIds:
-    - rid: 5517520050404196353
+    - rid: 5517520329517826067
       type: {class: UnitAttributes, ns: , asm: Assembly-CSharp}
       data:
         currentHealth: 0
@@ -247,7 +252,7 @@ MonoBehaviour:
         impactQuantity: 0
         impactQuantityMax: 5
         stunHeal: 1
-        attackInterval: 0.3
+        attackInterval: 1
 --- !u!61 &7333986931189692777
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -319,15 +324,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08f2da8a8f18b0545a47ba270c624cf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chaseRange: 20
-  attackRange: 8
-  attackRangeMode: 0
-  chaseRangeMode: 0
+  scanRange: 20
   scanInterval: 0.5
   checkInterval: 0.1
   minDistanceDifference: 1
-  isCommand: 0
-  currentState: 2
 --- !u!114 &3259434606447146000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -368,6 +368,8 @@ MonoBehaviour:
   initializeState: 0
   stunDuration: 0
   lastState: 0
+  main_State: 0
+  secondaryState: 0
 --- !u!1 &8906820460801057708
 GameObject:
   m_ObjectHideFlags: 0
@@ -398,7 +400,7 @@ Transform:
   m_LocalScale: {x: 0.2, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 4506195588132372675}
+  m_Father: {fileID: 1379606418424311374}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7611960711658022004
 SpriteRenderer:

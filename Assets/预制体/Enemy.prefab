@@ -179,24 +179,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 2652715914459273330}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c9648e4844285745aa1c29765ca9bbd, type: 3}
+  m_Script: {fileID: 11500000, guid: 20834d58ce3e347448e21ed5269870ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   faction: {fileID: 0}
   movement: {fileID: 0}
   attributes:
-    rid: 5517520190596186117
+    rid: 5517520329517826066
   detector: {fileID: 0}
   unitVisualEffect: {fileID: 0}
   UnitCommander: {fileID: 0}
   mainState: {fileID: 0}
+  behaviorTreeManager: {fileID: 0}
+  attackRange: 1
   selectSprite: {fileID: 0}
-  StateSprite: {fileID: 6651385092834853898}
+  StateSprite: {fileID: 0}
+  chaseRange_Advance: 5
+  chaseRange_Normal: 20
+  chaseRange_Current: 0
   commandAttackTarget: {fileID: 0}
   references:
     version: 2
     RefIds:
-    - rid: 5517520190596186117
+    - rid: 5517520329517826066
       type: {class: UnitAttributes, ns: , asm: Assembly-CSharp}
       data:
         currentHealth: 0
@@ -207,7 +212,7 @@ MonoBehaviour:
         impactQuantity: 0
         impactQuantityMax: 5
         stunHeal: 1
-        attackInterval: 0.3
+        attackInterval: 1
 --- !u!50 &8053890687525218050
 Rigidbody2D:
   serializedVersion: 4
@@ -274,15 +279,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08f2da8a8f18b0545a47ba270c624cf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chaseRange: 20
-  attackRange: 1
-  attackRangeMode: 1
-  chaseRangeMode: 0
+  scanRange: 20
   scanInterval: 0.5
   checkInterval: 0.1
   minDistanceDifference: 1
-  isCommand: 0
-  currentState: 2
 --- !u!114 &6870910256839309260
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -323,6 +323,8 @@ MonoBehaviour:
   initializeState: 0
   stunDuration: 0
   lastState: 0
+  main_State: 0
+  secondaryState: 0
 --- !u!1 &2728204917092874339
 GameObject:
   m_ObjectHideFlags: 0
