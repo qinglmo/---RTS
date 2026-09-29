@@ -14,16 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rules:
   - fromState: 0
-    fromStateHasValue: 1
-    triggerEvent: 5
-    toState: 1
-    priority: 0
-  - fromState: 1
-    fromStateHasValue: 1
-    triggerEvent: 7
-    toState: 0
-    priority: 0
-  - fromState: 0
     fromStateHasValue: 0
     triggerEvent: 6
     toState: 3

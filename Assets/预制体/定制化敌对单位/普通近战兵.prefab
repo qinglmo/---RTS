@@ -203,9 +203,10 @@ MonoBehaviour:
     - rid: 5517520329517826066
       type: {class: UnitAttributes, ns: , asm: Assembly-CSharp}
       data:
-        currentHealth: 10
-        maxHealth: 10
-        baseAttack: 2
+        base_maxHealth: 5
+        currentHealth: 50
+        maxHealth: 50
+        baseAttack: 1
         baseDefense: 1
         toughness: 0
         impactQuantity: 0
@@ -321,7 +322,6 @@ MonoBehaviour:
   transitionRules: {fileID: 11400000, guid: e35a77c896d376d4a99c98da8fa56537, type: 2}
   initializeState: 0
   stunDuration: 0
-  lastState: 0
   main_State: 0
   secondaryState: 0
 --- !u!1 &8885453552849075287

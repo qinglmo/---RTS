@@ -15,7 +15,8 @@ MonoBehaviour:
   unitName: "\u8FDC\u7A0B\u5355\u4F4D"
   prefab: {fileID: 7742949438478305316, guid: c4229e3e980e09d4995614e6f659f1b2, type: 3}
   health: 10
-  attack: 1
+  attack: 5
   foodCost: 50
   woodCost: 0
   stoneCost: 0
+  productionTime: 0
