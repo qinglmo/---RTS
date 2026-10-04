@@ -82,7 +82,6 @@ public class GridWorldService : MonoBehaviour, IMoveApplyWorld
         {
             noOccupyUnits.Add(unit);//
         }
-        GridManager.Instance.terrainTilemap.SetColor((Vector3Int)grid, unit.Faction.factionColor);
         allUnit.Add(unit);
     }
     public void LastRelease(BaseUnit unit, Vector2Int grid)
@@ -119,7 +118,6 @@ public class GridWorldService : MonoBehaviour, IMoveApplyWorld
             if(gridOccupancy.TryOccupy(target, unit))
             {
                 unit.movement.stepMover.OnOccupyChangedTrriger(true);
-                GridManager.Instance.terrainTilemap.SetColor((Vector3Int)target, unit.Faction.factionColor);
             }
             else
             {

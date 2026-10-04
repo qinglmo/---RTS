@@ -22,9 +22,11 @@ public class TargetDetector : MonoBehaviour
     [Header("检测频率")]
     [SerializeField] private float scanInterval = 0.5f;   // 扫描新敌人间隔
     [SerializeField] private float checkInterval = 0.1f;  // 检测当前目标间隔
-
+    [SerializeField] private float scanInterval2=2.0f;//视野外敌人检查间隔
     private float scanTimer;
     private float checkTimer;
+    private float scanTimer2;  
+
     [Header("切换阈值")]
     [SerializeField] private float minDistanceDifference = 1f;   // 切换目标所需的最小距离差距
     private bool isDetectionActive = true;
@@ -99,12 +101,31 @@ public class TargetDetector : MonoBehaviour
             checkTimer = 0f;
             UpdateAttationState();
         }
+        // 频检测视野外敌人
+        scanTimer2 += Time.deltaTime;
+        if (scanTimer2 >= scanInterval2)
+        {
+            scanTimer2 = 0f;
+            //UpdateEnemy2();
+        }
     }
     private void UpdateEnemy()
     {
         if(!openEnemyDetector) return;
         var targets = targetProvider.GetAllTargetsInRange(unit.GridPos,scanRange, unit.Faction.enemies[0]);
-        //targets = targetFiltering.VisionFiltering(targets, mask);//视线过滤
+        targets = targetFiltering.VisionFiltering(targets, mask);//视线过滤
+        var target = targetEvaluation.Evaluate(targets, currentTarget, unit);
+        if (target == null)
+        {
+            target=targetEvaluation.EvaluateUnits(FactionManager.Instance.GetUnits(unit.Faction.enemies[0]),unit);
+        }
+        CurrentTarget = target;
+    }
+    private void UpdateEnemy2()
+    {
+        if(!openEnemyDetector) return;
+        var targets = targetProvider.GetAllTargetsInRange(unit.GridPos,scanRange, unit.Faction.enemies[0]);
+        targets = targetFiltering.VisionFiltering(targets, mask);//视线过滤
         var target = targetEvaluation.Evaluate(targets, currentTarget, unit);
         if (target == null)
         {
