@@ -7,7 +7,7 @@ using UnityEngine;
 
 public interface ITargetFiltering
 {
-    public EntityCollection VisionFiltering(EntityCollection entity, LayerMask obstacleLayer);
+    public List<IHasPosition> VisionFiltering(List<IHasPosition> targets, LayerMask obstacleLayer);
     public bool IsVisiableToOne(IHasPosition currentTarget, LayerMask obstacleLayer);
 }
 
@@ -18,27 +18,19 @@ public class ViewFiltering :MonoBehaviour,ITargetFiltering
     /// </summary>
     /// <param name="entity"></param>
     /// <returns></returns>
-    public EntityCollection VisionFiltering(EntityCollection entity, LayerMask obstacleLayer)
+    public List<IHasPosition> VisionFiltering(List<IHasPosition> targets, LayerMask obstacleLayer)
     {
 
         Vector2 startPosition = transform.position;
-        var units = new List<BaseUnit>();
-        var buildings = new List<BaseBuilding>();
-        foreach (var unit in entity.Units)
+        var targetList = new List<IHasPosition>();
+        foreach (var target in targets)
         {
-            if (IsVisiable(startPosition, unit.Position, obstacleLayer))
+            if (IsVisiable(startPosition, target.Position, obstacleLayer))
             {
-                units.Add(unit);
+                targetList.Add(target);
             }
         }
-        foreach (var building in entity.Buildings)
-        {
-            if (IsVisiable(startPosition, building.Position, obstacleLayer))
-            {
-                buildings.Add(building);
-            }
-        }
-        return new EntityCollection(buildings, units);
+        return targetList;
 
     }
     /// <summary>

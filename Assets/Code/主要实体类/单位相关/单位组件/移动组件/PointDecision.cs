@@ -165,5 +165,111 @@ public static class PointDecision
             new Vector2Int(cell.x, cell.y - 1)
         };
     }
+    /// <summary>
+    /// 寻找基于单位对目标的一个最佳攻击位置.
+    /// 通常起点不会是考虑的位置,所以不考虑.不会为了万一加额外的逻辑.
+    /// 对于每一个位置,会按照如下顺序检查,边界内,可预占领,可攻击目标.第一个完成全部条件的目标就是最佳攻击位置.
+    /// 如果不可占领,检查可通行性用于寻路.
+    /// </summary>
+    /// <param name="unit"></param>
+    /// <param name="target"></param>
+    /// <returns></returns>
+    public static Vector2Int? FindAttackPoint(BaseUnit unit, IHasPosition target,LayerMask blockMask,int attackRange,
+    Func<Vector2Int, BaseUnit, bool> isWalkable,
+    Func<Vector2Int, BaseUnit, bool> IsPreOccupyable,
+    Func<LayerMask, Vector2Int,Vector2Int,int, bool> IsAttackable)
+    {
+        Vector2Int start = unit.GridPos;
+        Vector2Int targetPos = target.GridPos;
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
 
+        queue.Enqueue(start);
+        visited.Add(start);
+
+        Vector2Int[] directions = {
+            Vector2Int.up,
+            Vector2Int.down,
+            Vector2Int.left,
+            Vector2Int.right
+        };
+
+        while (queue.Count > 0)
+        {
+            Vector2Int current = queue.Dequeue();
+
+            // 起点不考虑：单位已经站在这里，通常不是要选的攻击位置
+            if (current != start)
+            {
+                // 按顺序检查：边界内 → 可预占领 → 可攻击目标
+                if ( IsPreOccupyable(current, unit)
+                    && IsAttackable(blockMask, current, targetPos, attackRange))
+                {
+                    // BFS 保证这是离单位最近的合法攻击位置
+                    return current;
+                }
+            }
+
+            // 扩展 BFS：只有可行走的格子才能继续向外搜索
+            // 注意：即使当前格子不可预占领，只要可行走就继续扩展
+            foreach (var dir in directions)
+            {
+                Vector2Int neighbor = current + dir;
+
+                if (visited.Contains(neighbor)) continue;
+                if (!isWalkable(neighbor, unit)) continue;
+
+                visited.Add(neighbor);
+                queue.Enqueue(neighbor);
+            }
+        }
+
+        return null;
+    }
+    /// <summary>
+    /// 随便在目标附近找一个可占领的位置
+    /// </summary>
+    /// <returns></returns>
+    public static Vector2Int? FindOccupiablePoint(BaseUnit unit, IHasPosition target, Func<Vector2Int, BaseUnit, bool> isWalkable, Func<Vector2Int, BaseUnit, bool>IsPreOccupyable)
+    {
+        Vector2Int start = target.GridPos;
+
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+
+        queue.Enqueue(start);
+        visited.Add(start);
+
+        Vector2Int[] directions = {
+            Vector2Int.up,
+            Vector2Int.down,
+            Vector2Int.left,
+            Vector2Int.right
+        };
+
+        while (queue.Count > 0)
+        {
+            Vector2Int current = queue.Dequeue();
+
+            // 目标本身通常被占据，可预占领判断会自动过滤掉它
+            if (IsPreOccupyable(current, unit))
+            {
+                return current;
+            }
+
+            // 扩展 BFS，只有可行走的格子才能继续向外找
+            foreach (var dir in directions)
+            {
+                Vector2Int neighbor = current + dir;
+
+                if (visited.Contains(neighbor)) continue;
+                if (!isWalkable(neighbor, unit)) continue;
+
+                visited.Add(neighbor);
+                queue.Enqueue(neighbor);
+            }
+        }
+
+        return null;
+    }
 }

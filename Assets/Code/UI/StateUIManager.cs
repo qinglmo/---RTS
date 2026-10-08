@@ -20,28 +20,37 @@ public class StateUIManager : MonoBehaviour
     }
 
     
-    public void ChangeStateColor(BaseUnit unit,UnitState state)
+    public void ChangeStateColor(BaseUnit unit,StateMachine stateMachine)
     {
         var sprite =unit.StateSprite;
         if (sprite != null)
         {
-            switch (state)
+            switch (stateMachine.CurrentStateEnum)
             {
-                case UnitState.Top_Work:sprite.color = Color.green;
+                case UnitState.ActionToTarget:
+                {
+                    switch ((stateMachine.GetState(UnitState.ActionToTarget) as ActionToTargetState).action)
+                    {
+                        case UnitAction.Attack:
+                            sprite.color = Color.red;
+                            break;
+                        default:
+                            sprite.color = Color.green;
+                            break;
+                    }
+                }
                     break;
-                case UnitState.Top_Attack:sprite.color = Color.red;
+                case UnitState.MoveToPos:sprite.color = Color.green;
                     break;
-                case UnitState.Chaseing:sprite.color = Color.yellow;
+                case UnitState.Stunned:sprite.color = Color.yellow;
                     break;
-                case UnitState.Wandering:sprite.color = Color.blue;
-                    break;
-                case UnitState.Top_Stun:sprite.color = Color.black;
-                    break;
-                case UnitState.Top_Heal:sprite.color = Color.gray;
+                case UnitState.Idle:sprite.color = Color.gray;
                     break;
                 default:sprite.color=Color.white;
                     break;
             }
         }
     }
+
+    
 }

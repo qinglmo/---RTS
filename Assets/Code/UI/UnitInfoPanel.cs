@@ -47,10 +47,10 @@ public class UnitInfoPanel : MonoBehaviour
         unit.attributes.OnDefenseChanged += UpdateDefense;
         unit.attributes.OnimpactQuantityChanged += UpdateImpact;
         unit.movement.stepMover.OnStepCompleted += UpdatePosition;
-        unit.mainState.StateMachine.OnUnitStateChanged += UpdateStatus;
-        unit.mainState.OnSecondaryStateChanged += UpdateStatus2;
+        //unit.mainState.StateMachine.OnUnitStateChanged += UpdateStatus;
+        //unit.mainState.OnSecondaryStateChanged += UpdateStatus2;
         unit.movement.stepMover.OnOccupyChanged += UpdateOccupy;
-        unit.detector.OnTargetChanged += UpdateCurrentTarget;
+        unit.intentionDecision.OnTargetChanged += UpdateCurrentTarget;
 
     }
     private void Unsubscribe()
@@ -64,10 +64,10 @@ public class UnitInfoPanel : MonoBehaviour
         lastUnit.attributes.OnDefenseChanged -= UpdateDefense;
         lastUnit.attributes.OnimpactQuantityChanged -= UpdateImpact;
         lastUnit.movement.stepMover.OnStepCompleted -= UpdatePosition;
-        lastUnit.mainState.StateMachine.OnUnitStateChanged -= UpdateStatus;
-        lastUnit.mainState.OnSecondaryStateChanged -= UpdateStatus2;
+        //lastUnit.unit.mainState.StateMachine.OnUnitStateChanged -= UpdateStatus;
+        //lastunit.mainState.OnSecondaryStateChanged -= UpdateStatus2;
         lastUnit.movement.stepMover.OnOccupyChanged -= UpdateOccupy;
-        lastUnit.detector.OnTargetChanged -= UpdateCurrentTarget;
+        lastUnit.intentionDecision.OnTargetChanged -= UpdateCurrentTarget;
     }
     #region 独立属性更新方法（用于事件订阅）
 
@@ -114,10 +114,64 @@ public class UnitInfoPanel : MonoBehaviour
     }
 
     /// <summary>更新状态</summary>
-    public void UpdateStatus(BaseUnit unit , UnitState status)//因为事件带null
+    public void UpdateStatus(BaseUnit unit , IntentionDecision IntentionState)
     {
-        if (statusText != null)
-            statusText.text = status.ToString();
+        switch (IntentionState.decisionExecution.GetCurrentState())
+            {
+                
+                case UnitState.Stunned:statusText.text = "麻痹";
+                    break;
+                default:
+                {
+                    switch(IntentionState.currentIntent)
+                    {
+                        case IntentionDecision.IntentType.Attack:
+                            {
+                                var target = IntentionState.CurrentTarget as MonoBehaviour;
+                                if (target != null)
+                                {
+                                    statusText.text = $"攻击 {target.name}";
+                                }
+                                else
+                                {
+                                    statusText.text = "攻击";
+                                }
+                            }
+                            break;
+                        case IntentionDecision.IntentType.Chase:
+                            {
+                                var target = IntentionState.CurrentTarget as MonoBehaviour;
+                                if (target != null)
+                                {
+                                    statusText.text = $"追逐 {target.name}";
+                                }
+                                else
+                                {
+                                    statusText.text = "追逐";
+                                }
+                            }
+                            break;
+                        case IntentionDecision.IntentType.Find:
+                            {
+                                var target = IntentionState.CurrentTarget as MonoBehaviour;
+                                if (target != null)
+                                {
+                                    statusText.text = $"接近 {target.name}";
+                                }
+                                else
+                                {
+                                    statusText.text = "接近";
+                                }
+                            }
+                            break;
+                        case IntentionDecision.IntentType.Idle:statusText.text = "待机";
+                            break;
+                        default:statusText.text = "未知";
+                            break;
+                    }
+                }
+                    break;
+            }
     }
 
     public void UpdateStatus2( UnitState status)//
@@ -154,7 +208,7 @@ public class UnitInfoPanel : MonoBehaviour
     /// <summary>
     /// 一次性更新所有信息（内部调用独立方法）
     /// </summary>
-    private void UpdateInfo(string unitName, int currentHealth, int maxHealth, int attack, int defense, float impact, Vector2Int gridPos, UnitState status)
+    private void UpdateInfo(string unitName, int currentHealth, int maxHealth, int attack, int defense, float impact, Vector2Int gridPos, IntentionDecision IntentionState)
     {
         UpdateName(unitName);
         UpdateHealth(currentHealth, maxHealth);
@@ -162,7 +216,7 @@ public class UnitInfoPanel : MonoBehaviour
         UpdateDefense(defense);
         UpdateImpact(impact);
         UpdatePosition(gridPos);
-        UpdateStatus(null, status);
+        UpdateStatus(null, IntentionState);
     }
 
      public void UpdateInfo(BaseUnit unit) 
@@ -172,11 +226,10 @@ public class UnitInfoPanel : MonoBehaviour
         UpdateInfo(
         unit.name, unit.attributes.CurrentHealth, unit.attributes.MaxHealth,
         unit.attributes.BaseAttack, unit.attributes.BaseDefense, unit.attributes.impactQuantity,
-        unit.GridPos, unit.mainState.StateMachine.CurrentStateEnum
+        unit.GridPos, unit.intentionDecision
          );
         UpdateOccupy(unit.movement.stepMover.IsOccupy);
-        UpdateStatus2(unit.mainState.SecondaryState);
-        UpdateCurrentTarget(unit.detector.CurrentTarget);
+        UpdateCurrentTarget(unit.intentionDecision.CurrentTarget);
     }
 
     #endregion

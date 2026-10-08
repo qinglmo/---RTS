@@ -33,7 +33,8 @@ public class BuildingMainSettlement : BaseBuilding,IProduction
     }
     private void TimeHourUpdate()
     {
-        var targets=resourceProvider.GetAllResourceInCircle(GridPos,scan);
+        var cells = GridRange.Get(GridPos, (int)scan, GridRangeShape.Circle);
+        var targets=resourceProvider.GetAllResourceInCircle(cells);
         foreach(var resource in targets)
         {
             if(!resources.ContainsKey(resource))

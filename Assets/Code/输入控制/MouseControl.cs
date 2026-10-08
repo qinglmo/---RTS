@@ -91,77 +91,77 @@ public class MouseControl : MonoBehaviour
     }
     private void HandleRightClick()
     {
-        if (Input.GetMouseButtonDown(1) && selectedUnits.Count > 0)
-        {
-            foreach (var unit in selectedUnits)
-            {
-                if (unit != null)
-                {
-                    //清除其他命令
-                    unit.UnitCommander.ClearAllCommands();
-                }
-            }
-            // 1. 射线检测鼠标下的物体
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
+        // if (Input.GetMouseButtonDown(1) && selectedUnits.Count > 0)
+        // {
+        //     foreach (var unit in selectedUnits)
+        //     {
+        //         if (unit != null)
+        //         {
+        //             //清除其他命令
+        //             unit.UnitCommander.ClearAllCommands();
+        //         }
+        //     }
+        //     // 1. 射线检测鼠标下的物体
+        //     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //     RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
 
-            // 2. 如果点击到物体
-            if (hit.collider != null)
-            {
-                GameObject clickedObject = hit.collider.gameObject;
+        //     // 2. 如果点击到物体
+        //     if (hit.collider != null)
+        //     {
+        //         GameObject clickedObject = hit.collider.gameObject;
 
-                // 2.1 点击到敌人（标签为 "Enemy"）
-                if (clickedObject.CompareTag("Enemy"))
-                {
-                    foreach (var unit in selectedUnits)
-                    {
-                        if (unit != null)
-                        {
-                            unit.commandAttackTarget=clickedObject.GetComponent<BaseUnit>();
-                            unit.UnitCommander.AddCommand(new ChaseAttackCommand());
-                        }
-                    }
-                    return; // 指令已下发，跳过默认移动
-                }
+        //         // 2.1 点击到敌人（标签为 "Enemy"）
+        //         if (clickedObject.CompareTag("Enemy"))
+        //         {
+        //             foreach (var unit in selectedUnits)
+        //             {
+        //                 if (unit != null)
+        //                 {
+        //                     unit.commandAttackTarget=clickedObject.GetComponent<BaseUnit>();
+        //                     unit.UnitCommander.AddCommand(new ChaseAttackCommand());
+        //                 }
+        //             }
+        //             return; // 指令已下发，跳过默认移动
+        //         }
 
-                // 2.2 点击到可驻扎建筑
-                IStationIn building = clickedObject.GetComponent<IStationIn>();
-                if (building != null && building.CanOccupy())
-                {
-                    foreach (var unit in selectedUnits)
-                    {
-                        if (unit != null)
-                        {
-                            var pos = clickedObject.transform.position;
-                            unit.commandMovePosition = new Vector2Int((int)pos.x, (int)pos.y);
-                            unit.UnitCommander.AddCommand(new MoveOccupyCommand());
-                        }
-                    }
-                    return; // 指令已下发，跳过默认移动
-                }
-            }
-            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 targetPos = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
+        //         // 2.2 点击到可驻扎建筑
+        //         IStationIn building = clickedObject.GetComponent<IStationIn>();
+        //         if (building != null && building.CanOccupy())
+        //         {
+        //             foreach (var unit in selectedUnits)
+        //             {
+        //                 if (unit != null)
+        //                 {
+        //                     var pos = clickedObject.transform.position;
+        //                     unit.commandMovePosition = new Vector2Int((int)pos.x, (int)pos.y);
+        //                     unit.UnitCommander.AddCommand(new MoveOccupyCommand());
+        //                 }
+        //             }
+        //             return; // 指令已下发，跳过默认移动
+        //         }
+        //     }
+        //     Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        //     Vector2 targetPos = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
 
-            // 统一向所有选中单位发布移动命令
-            foreach (var unit in selectedUnits)
-            {
-                if (unit != null)
-                {
-                    MoveUnit(unit, targetPos);
-                }
-            }
-        }
+        //     // 统一向所有选中单位发布移动命令
+        //     foreach (var unit in selectedUnits)
+        //     {
+        //         if (unit != null)
+        //         {
+        //             MoveUnit(unit, targetPos);
+        //         }
+        //     }
+        // }
     }
     private void MoveUnit(BaseUnit unit, Vector2 target)
     {
-        // 尝试转换为具体Unit执行移动
-        Unit concreteUnit = unit as Unit;
-        if (concreteUnit != null)
-        {
-            concreteUnit.MoveToGridPos(GridManager.Instance.WorldToCell(target));
-        }
-        // 其他BaseUnit子类可以在这里扩展
+        // // 尝试转换为具体Unit执行移动
+        // Unit concreteUnit = unit as Unit;
+        // if (concreteUnit != null)
+        // {
+        //     concreteUnit.MoveToGridPos(GridManager.Instance.WorldToCell(target));
+        // }
+        // // 其他BaseUnit子类可以在这里扩展
     }
     private void HandleBoxSelection(List<BaseUnit> boxedUnits)
     {

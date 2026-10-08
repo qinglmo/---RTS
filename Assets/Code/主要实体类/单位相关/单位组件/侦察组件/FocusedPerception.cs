@@ -3,7 +3,13 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
-using static BehaviorTree.AttackNode;
+
+
+public enum RangeMode
+{
+    Circle,
+    Line,
+}
 public interface IFocusTarget
 {
     public bool IsTargetInRange(IHasPosition target, int range, Vector2Int currPos, RangeMode RangeMode=RangeMode.Circle);//现在统一攻击范围和追击范围，根据需要配置

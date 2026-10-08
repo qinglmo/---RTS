@@ -35,9 +35,9 @@ public class EnemyAI :SingletonMono<EnemyAI>
     }
     private void SetTarget_Unit(BaseUnit unit)
     {
-        if (unit.Faction == Faction)
-        {
-            unit.AttackTarget = totalTarget;
-        }
+        // if (unit.Faction == Faction)
+        // {
+        //     unit.AttackTarget = totalTarget;
+        // }
     }
 }

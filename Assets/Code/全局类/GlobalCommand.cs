@@ -59,21 +59,21 @@ public  class GlobalCommand :SingletonMono<GlobalCommand>
     }
     public void SetAttackTarget(Vector2Int pos) 
     {
-        TotalDefenseTarget = null;
-        TotalAttackTarget = pos;
-        foreach (var unit in FactionManager.Instance.FactionUnits[Faction])
-        {
-            unit.AttackTarget = pos;
-        }
+        // TotalDefenseTarget = null;
+        // TotalAttackTarget = pos;
+        // foreach (var unit in FactionManager.Instance.FactionUnits[Faction])
+        // {
+        //     unit.AttackTarget = pos;
+        // }
     }
     public void SetDefenseTarget(Vector2Int pos)
     {
-        TotalAttackTarget = null;
-        TotalDefenseTarget = pos;
-        foreach (var unit in FactionManager.Instance.FactionUnits[Faction])
-        {
-            unit.DefenseTarget = pos;
-        }
+        // TotalAttackTarget = null;
+        // TotalDefenseTarget = pos;
+        // foreach (var unit in FactionManager.Instance.FactionUnits[Faction])
+        // {
+        //     unit.DefenseTarget = pos;
+        // }
     }
     public void ClearAllTarget()
     {

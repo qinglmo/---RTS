@@ -27,10 +27,6 @@ public class Unit : BaseUnit
         base.OnDestroy();
         if (movement != null) movement.OnMoveCompleted -= OnMoveCompleted;
     }
-    public void MoveToGridPos(Vector2Int target)
-    {
-        commandMovePosition = new Vector2Int(target.x, target.y);
-    }
 
     // 公有发射方法
     public void ShootAt(Vector2 target)

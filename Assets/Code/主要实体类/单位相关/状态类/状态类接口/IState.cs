@@ -5,12 +5,15 @@ using UnityEngine;
 
 public interface IState
 {
-    void Enter();      // ½øÈë×´Ì¬Ê±µ÷ÓÃ
-    void Update();     // Ã¿Ö¡¸üĞÂ
-    void Exit();       // ÍË³ö×´Ì¬Ê±µ÷ÓÃ
+    void Enter();      // è¿›å…¥çŠ¶æ€æ—¶è°ƒç”¨
+    void Update();     // æ¯å¸§æ›´æ–°
+    void Exit();       // é€€å‡ºçŠ¶æ€æ—¶è°ƒç”¨
 
-    void Reset();//ÖØÖÃ×´Ì¬£¬×´Ì¬¸´ÓÃ
+    void Reset();//é‡ç½®çŠ¶æ€ï¼ŒçŠ¶æ€å¤ç”¨
+
 }
+
+
 
 public interface IBranchState :IState
 {

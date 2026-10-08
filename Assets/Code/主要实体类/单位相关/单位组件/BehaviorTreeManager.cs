@@ -10,16 +10,16 @@ public class BehaviorTreeManager :MonoBehaviour
     private void Awake()
     {
         unit = GetComponent<BaseUnit>();
-        behaviorTree = unit.CreateTree(out blackboard);
+        //behaviorTree = unit.CreateTree(out blackboard);
     }
     private void Update()
     {
-        timer += Time.deltaTime;
-        if (timer > executionInterval)
-        {
-            timer = 0f;
-            behaviorTree.Evaluate();
-        }
+        // timer += Time.deltaTime;
+        // if (timer > executionInterval)
+        // {
+        //     timer = 0f;
+        //     behaviorTree.Evaluate();
+        // }
     }
 }
 

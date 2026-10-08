@@ -5,108 +5,126 @@ using UnityEngine;
 
 public interface ITargetEvaluation
 {
-    IHasPosition Evaluate(EntityCollection targets, IHasPosition currentTarget, IFactionMember currentUnit);
-    IHasPosition EvaluateUnits(List<BaseUnit> units, IFactionMember currentUnit);
+    public IHasPosition EvaluateUnitAndBuilding(List<IHasPosition> targets, TargetType PriorityTargetType,IHasPosition unit);
+    IHasPosition EvaluateUnits(List<IHasPosition> units, IHasPosition currentUnit);
+    IHasPosition EvaluateBuildings(List<IHasPosition> buildings, IHasPosition currentUnit);
+    public bool EvaluateChangeable(IHasPosition target,IHasPosition currentTarget,float switchCost);
 }
 
+public enum TargetType
+{
+    Unit,
+    Building
+}
 public class BrainDecision : MonoBehaviour, ITargetEvaluation
 {
     [SerializeField] private float minDistanceDifference = 0.8f; // 距离差异阈值（世界单位）
 
     /// <summary>
-    /// 评估目标：优先选择最近且未被包围的单位；若无单位则考虑建筑。
-    /// 当最近目标比当前目标近超过阈值时切换。
+    /// 优先目标类型,然后优先距离最近,可以选择单位或建筑
+    /// 不需要BaseUnit的属性,所以使用IHasPosition接口
+    /// 输入的单位要求可见和可攻击,该方法不检查目标是否可见和可攻击
     /// </summary>
-    public IHasPosition Evaluate(EntityCollection targets, IHasPosition currentTarget, IFactionMember currentUnit)
+    public IHasPosition EvaluateUnitAndBuilding(List<IHasPosition> targets, TargetType PriorityTargetType,IHasPosition unit)
     {
-        // 安全处理：若当前目标已被销毁，置空
-        if (!IsAlive(currentTarget))
-            currentTarget = null;
-
-        // 若当前目标存活，检查是否被包围，若是则强制重新选择
-        if (IsAlive(currentTarget) && IsTargetSurrounded(currentTarget.GridPos, currentUnit))
-            currentTarget = null;
-
         IHasPosition bestTarget = null;
-        if (targets.Units != null && targets.Units.Any())
+        List<IHasPosition> Units = new List<IHasPosition>();
+        List<IHasPosition> Buildings = new List<IHasPosition>();
+        foreach(var target in targets)
         {
-            // 获取最佳目标（优先单位
-            var best = GetBestTarget(targets.Units, currentUnit);
-            bestTarget = best as BaseUnit;
+            if(target is BaseUnit)
+                Units.Add(target);
+            else if(target is BaseBuilding)
+                Buildings.Add(target);
         }
-
-        if (bestTarget == null &&targets.Buildings != null && targets.Buildings.Any())
+        switch (PriorityTargetType)
         {
-            var best = GetBestTarget(targets.Buildings,currentUnit);
-            bestTarget = best as BaseBuilding;
+            case TargetType.Unit:
+                bestTarget = GetBestTarget(Units, unit);
+                break;
+            case TargetType.Building:
+                bestTarget = GetBestTarget(Buildings, unit);
+                break;
+            default:
+                return null;
         }
         
-        // 没有有效目标，保持原样
         if (bestTarget == null)
-            return currentTarget;
-
+        {
+            switch (PriorityTargetType)
+            {
+                case TargetType.Unit:
+                    bestTarget = GetBestTarget(Buildings, unit);
+                    break;
+                case TargetType.Building:
+                    bestTarget = GetBestTarget(Units, unit);
+                    break;
+                default:
+                    return null;
+            }
+        }
         // 没有当前目标，直接返回最佳目标
-        if (currentTarget == null)
-            return bestTarget;
-        // 7. 类型优先级处理：如果最佳是单位且当前是建筑，直接切换
-        bool bestIsUnit = bestTarget is BaseUnit;
-        bool currentIsUnit = currentTarget is BaseUnit;
-
-        if (bestIsUnit && !currentIsUnit) // 单位优先于建筑
-            return bestTarget;
-
-        // 8. 如果当前是单位而最佳是建筑，则不切换（保持单位）
-        if (!bestIsUnit && currentIsUnit)
-            return currentTarget;
-        // 如果最佳目标就是当前目标，保持
-        if (AreSameTarget(bestTarget, currentTarget))
-            return currentTarget;
-
-        // 计算距离差，决定是否切换
-        float currentDist = Vector2.Distance(currentUnit.Position, currentTarget.Position);
-        float bestDist = Vector2.Distance(currentUnit.Position, bestTarget.Position);
-
-        if (currentDist - bestDist > minDistanceDifference)
-            return bestTarget;
-        else
-            return currentTarget;
+        if (bestTarget == null)
+            return null;
+        return bestTarget;
     }
-    public IHasPosition EvaluateUnits(List<BaseUnit> units, IFactionMember currentUnit)
+    /// <summary>
+    /// 只评估单位目标,不评估建筑目标
+    /// </summary>
+    /// <param name="units"></param>
+    /// <param name="currentUnit"></param>
+    /// <returns></returns>
+    public IHasPosition EvaluateUnits(List<IHasPosition> units, IHasPosition unit)
     {
         if(units==null || !units.Any())
             return null;
-        return GetBestTarget(units,currentUnit);
+        return GetBestTarget(units,unit);
     }
     /// <summary>
-    /// 获取最佳目标：先过滤出未被包围的目标，优先选择最近的单位，
+    /// 只评估建筑目标,不评估单位目标
     /// </summary>
-    private IHasPosition GetBestTarget(IEnumerable<IHasPosition> targets, IFactionMember currentUnit)
+    /// <param name="Buildings"></param>
+    /// <param name="unit"></param>
+    /// <returns></returns>
+    public IHasPosition EvaluateBuildings(List<IHasPosition> Buildings, IHasPosition unit)
     {
-        // 过滤空引用和已销毁对象，并排除被包围的目标
-        var validTargets = targets.Where(t => IsAlive(t) && !IsTargetSurrounded(t.GridPos, currentUnit)).ToList();
+        if(Buildings==null || !Buildings.Any())
+            return null;
+        return GetBestTarget(Buildings,unit);
+    }
+    /// <summary>
+    /// 输入的前提是目标比当前目标近,没有这个前提则没有判断的意义.
+    /// 明确输入不为null,且存活
+    /// </summary>
+    /// <param name="target"></param>
+    /// <param name="currentTarget"></param>
+    /// <param name="switchCost"></param>
+    /// <returns></returns>
+    public bool EvaluateChangeable(IHasPosition target,IHasPosition currentTarget,float switchCost)
+    {
+        if (Vector2.Distance(target.GridPos, currentTarget.GridPos) > minDistanceDifference)
+        {
+            return true;
+        }
+        return false;
+    }
+    /// <summary>
+    /// 获取最佳目标：优先选择最近的单位，
+    /// </summary>
+    private IHasPosition GetBestTarget(IEnumerable<IHasPosition> targets, IHasPosition unit)
+    {
+        if(targets==null || !targets.Any())
+            return null;
+        // 过滤空引用和已销毁对象
+        var validTargets = targets.Where(t => IsAlive(t)).ToList();
 
         if (!validTargets.Any())
             return null;
 
-
-        return validTargets.OrderBy(u => Vector2.Distance(currentUnit.Position, u.Position)).First();
+        return validTargets.OrderBy(u => Vector2.Distance(unit.GridPos, u.GridPos)).First();
     }
-    /// <summary>
-    /// 判断目标是否被包围（近战单位无法找到攻击位置）
-    /// 检查目标周围四个方向是否存在可占据的格子。
-    /// </summary>
-    private bool IsTargetSurrounded(Vector2Int targetGrid, IFactionMember currUnit)
-    {
-        Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
 
-        foreach (var dir in directions)
-        {
-            Vector2Int neighbor = targetGrid + dir;
-            if (MovementRules.IsPreOccupyable(neighbor, currUnit))
-                return false; // 至少有一个可用攻击位
-        }
-        return true; // 所有方向都不可占据
-    }
+
     // 辅助方法：安全判断接口对象是否存活（Unity对象未被销毁）
     private bool IsAlive(IHasPosition obj)
     {
