@@ -9,6 +9,7 @@ public interface ITargetEvaluation
     IHasPosition EvaluateUnits(List<IHasPosition> units, IHasPosition currentUnit);
     IHasPosition EvaluateBuildings(List<IHasPosition> buildings, IHasPosition currentUnit);
     public bool EvaluateChangeable(IHasPosition target,IHasPosition currentTarget,float switchCost);
+    public IHasPosition EvaluateHelpUnit(List<BaseUnit> targets, IHasPosition currentUnit);
 }
 
 public enum TargetType
@@ -107,6 +108,40 @@ public class BrainDecision : MonoBehaviour, ITargetEvaluation
             return true;
         }
         return false;
+    }
+    public IHasPosition EvaluateHelpUnit(List<BaseUnit> targets, IHasPosition currentUnit)
+    {
+        //这是一个打分评估,基于距离和缺失血量两项,距离近,缺失血量多的优先选择
+        IHasPosition bestTarget = null;//维持一个最佳目标,分数最高的目标
+        float bestTargetScore = float.MinValue;//维持一个最佳目标的分数,初始值为最小值
+        //考虑到切换目标的损耗,距离的权重要大于缺失血量
+        float distanceWeight = 1f;
+        float missingWeight = 0.5f;
+        //然后是归一化的处理,希望的距离范围是0-50之间,血量的范围是0-50之间,大于的按上限处理.
+
+        foreach (var target in targets)
+        {
+            float distance= Vector2.Distance(target.GridPos, currentUnit.GridPos);
+            if (distance > 50)
+            {
+                distance = 50;
+            }
+            distance = distance / 50;
+            float missingHealth = target.attributes.MaxHealth - target.attributes.CurrentHealth;
+            if (missingHealth > 50)
+            {
+                missingHealth = 50;
+            }
+            missingHealth = missingHealth / 50;
+            //注意是距离近分数高.
+            float score = distanceWeight * (1-distance) + missingWeight * missingHealth;
+            if (bestTarget == null || score > bestTargetScore)
+            {
+                bestTarget = target;
+                bestTargetScore = score;
+            }
+        }
+        return bestTarget;
     }
     /// <summary>
     /// 获取最佳目标：优先选择最近的单位，

@@ -27,7 +27,7 @@ public class StepMover: MonoBehaviour
     public event System.Action<Vector2Int> OnStepCompleted; // 每移动一格后触发
     
     public event Action<bool> OnOccupyChanged;
-    public SpriteRenderer playerSprite;
+    public Transform playerSprite;
     public BaseUnit baseUnit;
     public StepMoverStateMachine stateMachine;
     public ISnapToGrid snapToGrid;
@@ -51,7 +51,7 @@ public class StepMover: MonoBehaviour
         moveApplyWorld = GridWorldService.Instance;
         CurrentPos = snapToGrid.WorldToCell(transform.position);
         moveApplyWorld.FristOccupy(baseUnit, CurrentPos);
-        playerSprite = transform.Find("Character").GetComponent<SpriteRenderer>();
+        playerSprite = transform.Find("Character").GetComponent<Transform>();
         stateMachine =new StepMoverStateMachine(stateEnum =>//状态池化后只会创建一次，所有动态数据不要通过这个创建
         {
             return stateEnum switch

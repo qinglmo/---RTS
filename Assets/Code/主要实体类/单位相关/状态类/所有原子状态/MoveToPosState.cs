@@ -38,7 +38,7 @@ public class MoveToPosState : IState
     }
     public void Exit()
     {
-        unit.movement.stepMover.CancelMove();
+        
     }
 
     public void Reset()

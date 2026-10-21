@@ -64,7 +64,7 @@ public class GridWorldService : MonoBehaviour, IMoveApplyWorld
         if (timer>=inspectionInterval)
         {
             timer = 0;
-            //UpdatePhysicalEasy();
+            UpdatePhysicalEasy();
             noOccupyUnitCount=noOccupyUnits.Count;
             allUnitCount=allUnit.Count;
             //UpdatePhysicalEasyAll();

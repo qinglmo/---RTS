@@ -11,7 +11,11 @@ public static  class ActionCompleted
         {
             case UnitAction.Attack:
                 {
-                    if(target is BaseUnit)
+                    if(unit is Unit)
+                    {
+                        (unit as Unit).ShootAt(target.Position);
+                    }
+                    else if(target is BaseUnit)
                         AttackAction(unit, target as BaseUnit);
                     else if(target is BaseBuilding)
                     {
@@ -42,6 +46,7 @@ public static  class ActionCompleted
     private static void HelpAction(BaseUnit unit,BaseUnit target)
     {
         target.attributes.Heal(1);//目前没有这个属性，所以只能临时处理为1
+        SpecialEffectsManager.instance.CreateHealEffect(target,1);
     }
     private static void CollectAction(BaseUnit unit,IResource target)
     {

@@ -19,6 +19,7 @@ public class Wave
     /// </summary>
     public void Spawn()
     {
+        int RetryCount = 0;
         for (int i = 0; i < count; i++)
         {
             // 在范围内随机位置
@@ -26,6 +27,19 @@ public class Wave
             float randomY = Random.Range(spawnRangeMin.y, spawnRangeMax.y);
             Vector3 spawnPos = new Vector3(randomX, randomY, 0f);
 
+            //判断位置的合法性
+            if(GridManager.Instance.IsOccupied(GridManager.Instance.WorldToCell(spawnPos)))
+            {
+                Debug.LogWarning($"波次{waveNumber}生成位置被占用，尝试重新生成");
+                i--; // 重新尝试生成
+                RetryCount++;
+                if(RetryCount>10)
+                {
+                    Debug.LogError($"波次{waveNumber}生成位置连续失败超过10次，停止生成");
+                    break;
+                }
+                continue;
+            }
             // 实例化敌人
             if (enemyPrefab != null)
             {

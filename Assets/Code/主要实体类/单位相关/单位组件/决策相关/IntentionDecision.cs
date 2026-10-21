@@ -14,17 +14,23 @@ public class IntentionDecision : MonoBehaviour
     public enum IntentType
     {
         Attack,
+        Help
+    }
+    public IntentType currentIntentType = IntentType.Attack;
+
+    public enum IntentStatus
+    {
+        Action,
         Chase,
         Find,
         Idle
     }
-    public IntentType currentIntent = IntentType.Idle;
+    public IntentStatus currentIntentStatus = IntentStatus.Idle;
 
-    private List<IHasPosition> targets = new List<IHasPosition>();
     #region 序列化字段
     [Header("检测设置")]
     [SerializeField] private int chaseRange = 20; //追击范围
-    [SerializeField] private int attackRange = 1; //攻击范围
+    [SerializeField] private int actionRange = 1; //动作范围
     [Header("运行时数据")]
     private IHasPosition currentTarget;// 当前目标
 
@@ -98,51 +104,75 @@ public class IntentionDecision : MonoBehaviour
 
     private void Decision()
     {
-        targets.Clear();//清空目标列表,为下一次决策做准备
-        if(IsAttackIntent())
+        var targets = new List<IHasPosition>();
+        if(IsAction(out targets))
         {
-            currentIntent = IntentType.Attack;
+            currentIntentStatus = IntentStatus.Action;
         }
-        else if(IsChaseIntent())
+        else if(IsChaseIntent(out targets))
         {
-            currentIntent = IntentType.Chase;
+            currentIntentStatus = IntentStatus.Chase;
         }
-        else if(IsFindIntent())
+        else if(IsFindIntent(out targets))
         {
-            currentIntent = IntentType.Find;
+            currentIntentStatus = IntentStatus.Find;
         }
         else
         {
-            currentIntent = IntentType.Idle;
+            currentIntentStatus = IntentStatus.Idle;
         }
 
-        Debug.Log($"当前意图：{currentIntent} 单位:{(unit as MonoBehaviour).name}");
+        Debug.Log($"当前意图：{currentIntentStatus} 单位:{(unit as MonoBehaviour).name}");
 
+
+        if(currentIntentStatus==IntentStatus.Idle)
+        {
+            CurrentTarget = null;
+            decisionExecution.Idle();
+            return;
+        }
+        IHasPosition target=null;
         //基于意图评估当前目标
-        if(currentIntent==IntentType.Attack)
+        if(currentIntentType==IntentType.Attack)
         {
-            var target = targetEvaluation.EvaluateUnitAndBuilding(this.targets, TargetType.Unit, unit);
+            target = targetEvaluation.EvaluateUnitAndBuilding(targets, TargetType.Unit, unit);
             CurrentTarget = TargetChoose(target,currentTarget);
-            decisionExecution.ActionToTarget(UnitAction.Attack,currentTarget);
         }
-        else if(currentIntent==IntentType.Chase)
+        else if(currentIntentType==IntentType.Help)
         {
-            var target = targetEvaluation.EvaluateUnitAndBuilding(this.targets, TargetType.Unit, unit);
-            CurrentTarget = TargetChoose(target,currentTarget);
+            var units=new List<BaseUnit>();
+            foreach (var item in targets)
+            {
+                units.Add(item as BaseUnit);
+            }
+            target = targetEvaluation.EvaluateHelpUnit(units, unit);
+            CurrentTarget = target;
+        }
+
+        if(currentIntentStatus==IntentStatus.Action)
+        {
+            if(currentIntentType==IntentType.Attack)
+            {
+                decisionExecution.ActionToTarget(UnitAction.Attack,currentTarget);
+            }
+            else if(currentIntentType==IntentType.Help)
+            {
+                decisionExecution.ActionToTarget(UnitAction.Help,currentTarget);
+            }
+        }
+        else if(currentIntentStatus==IntentStatus.Chase)
+        {
             //找到最佳移动位置
-            var attackPoint = PointDecision.FindAttackPoint(unit as BaseUnit,currentTarget,mask,attackRange,MovementRules.IsWalkable,MovementRules.IsPreOccupyable,IsAttackable_Pos);
+            var attackPoint = PointDecision.FindAttackPoint(unit as BaseUnit,currentTarget,mask,actionRange,MovementRules.IsWalkable,MovementRules.IsPreOccupyable,IsActionable_Pos);
             if (attackPoint != null)
             {
                 Vector2Int gridPos = attackPoint.Value;
-                Debug.Log($"追击位置：{gridPos} 当前单位:{(unit as MonoBehaviour).name} 当前位置:{unit.GridPos} 目标位置:{currentTarget.GridPos}");
+                //Debug.Log($"追击位置：{gridPos} 当前单位:{(unit as MonoBehaviour).name} 当前位置:{unit.GridPos} 目标位置:{currentTarget.GridPos}");
                 decisionExecution.MoveToPos(gridPos);
             }
         }
-        else if(currentIntent==IntentType.Find)
+        else if(currentIntentStatus==IntentStatus.Find)
         {
-            var detectortarget = targetEvaluation.EvaluateUnitAndBuilding(this.targets, TargetType.Unit, unit);
-            //评估是否值得更换目标
-            CurrentTarget = TargetChoose(detectortarget,currentTarget);
             //找到最佳移动位置
             var targetPos = PointDecision.FindOccupiablePoint(unit as BaseUnit,currentTarget,MovementRules.IsWalkable,MovementRules.IsPreOccupyable);
             if (targetPos != null)
@@ -151,72 +181,133 @@ public class IntentionDecision : MonoBehaviour
                 decisionExecution.MoveToPos(gridPos);
             }
         }
-        else if(currentIntent==IntentType.Idle)
-        {
-            CurrentTarget = null;
-            decisionExecution.Idle();
-        }
     }
-    public bool IsAttackIntent()//攻击意图判断
+    public bool IsAction(out List<IHasPosition> targets)//是否需要执行动作
     {
-        //基于攻击范围检查是否有敌人
-        var cells = GridRange.Get(unit.GridPos, attackRange, GridRangeShape.Circle);
-        var detectortarget = targetProvider.GetAllTargetsInRange(unit.Faction.enemies[0], cells);
-        targets = targetFiltering.VisionFiltering(detectortarget, mask);//视线过滤
-        //因为当前只要能看见敌人且在攻击范围内，就会攻击，所以不需要可攻击性判断
-        if(this.targets.Count>0)
+        targets=new List<IHasPosition>();//使用out的话,就多new一次,总之out的语义挺清晰的:即不管输入是什么,输出一个新列表.
+        //先判断自身是否处于合法位置
+        if (!(unit as BaseUnit).movement.stepMover.IsOccupy)
         {
-            return true;
+            return false;
         }
-        return false;
+        //基于动作执行范围检查是否有敌人
+        var cells = GridRange.Get(unit.GridPos, actionRange, GridRangeShape.Circle);
+        targets = CollectTargets(currentIntentType,cells);
+        targets = IntentUniqueFilter(targets,currentIntentType);//意图独有过滤
+        targets = targetFiltering.VisionFiltering(targets, mask);//视线过滤
+        //因为当前只要能看见目标且在动作执行范围内，就可以执行动作，所以不需要判断
+        return targets.Count > 0;
     }
-    public bool IsChaseIntent()//追击意图判断
+    
+    private List<IHasPosition> CollectTargets(IntentType intentType,List<Vector2Int> cells)
     {
+        var targets = new List<IHasPosition>();
+        switch (intentType)
+        {
+            case IntentType.Attack:targets= targetProvider.GetAllTargetsInRange(unit.Faction.enemies[0], cells);
+                break;
+            case IntentType.Help:
+                {
+                    targets= targetProvider.GetAllTargetsInRange(unit.Faction, cells);
+                }
+                break;
+            default:
+                break;
+        }
+        return targets;
+    }
+    private List<IHasPosition> IntentUniqueFilter(List<IHasPosition> targets,IntentType intentType)
+    {
+        var out_targets=new List<IHasPosition>();
+        switch (intentType)
+        {
+            case IntentType.Attack:
+                {
+                    //目前没有可攻击性判断,所以直接返回所有目标
+                }
+                break;
+            case IntentType.Help://残血判断
+                {
+                    foreach(var target in targets)//残血判断
+                    {
+                        var helpTarget = target as BaseUnit;
+                        if(helpTarget!=null&&helpTarget.attributes.CurrentHealth<helpTarget.attributes.MaxHealth)
+                        {
+                            out_targets.Add(target);
+                        }
+                    }
+                    targets=out_targets;
+                }
+                break;
+            default:
+                break;
+        }
+        return targets;
+    }
+    public bool IsChaseIntent(out List<IHasPosition> targets)//////追击意图判断
+    {
+        targets=new List<IHasPosition>();
         //基于追击范围检查是否有敌人
-        var chasecells = GridRange.Get(unit.GridPos, chaseRange, GridRangeShape.Circle);
-        var attackcells = GridRange.Get(unit.GridPos, attackRange, GridRangeShape.Circle);
-        var cells = GridRange.Subtract(chasecells, attackcells);
-        var detectortargets = targetProvider.GetAllTargetsInRange(unit.Faction.enemies[0], cells);
-        detectortargets = targetFiltering.VisionFiltering(detectortargets, mask);//视线过滤
-        foreach(var detectortarget in detectortargets)//可攻击性判断
-        {
-            if(IsAttackable(unit as BaseUnit,detectortarget ,attackRange))
-            {
-                this.targets.Add(detectortarget);
-            }
-        }
-        if(this.targets.Count>0)
+        var cells = GridRange.Get(unit.GridPos, chaseRange, GridRangeShape.Circle);
+        //本来是想减掉攻击范围的,但是因为单位有可能因为自身原因处于非法攻击位置,所以攻击范围内的敌人也可能需要追击,所以不减掉攻击范围
+        targets = CollectTargets(currentIntentType,cells);
+        targets = IntentUniqueFilter(targets,currentIntentType);//意图独有过滤
+        targets = targetFiltering.VisionFiltering(targets, mask);//视线过滤
+        targets = ActionableFilter(targets);//可接近性判断
+        if(targets.Count>0)
         {
             return true;
         }
         return false;
     }
-    public bool IsFindIntent()//查找意图判断
+    public bool IsFindIntent(out List<IHasPosition> targets)//////查找意图判断
     {
-        //基于查找范围检查是否有敌人
-        var detectortargets = FactionManager.Instance.GetUnits(unit.Faction.enemies[0]);
-        foreach(var detectortarget in detectortargets)//可攻击性判断
+        targets=new List<IHasPosition>();
+        var detectortargets=new List<BaseUnit>();
+        //基于全地图范围检查是否有目标
+        switch (currentIntentType)
         {
-            if(IsAttackable(unit as BaseUnit,detectortarget ,attackRange))
+            case IntentType.Attack:detectortargets= FactionManager.Instance.GetUnits(unit.Faction.enemies[0]);
+                break;
+            case IntentType.Help:detectortargets= FactionManager.Instance.GetUnits(unit.Faction);
+                break;
+            default:
+                break;
+        }
+        foreach(var detectortarget in detectortargets)//可接近性判断
+        {
+            if(IsActionable(unit as BaseUnit,detectortarget ,actionRange))
             {
-                this.targets.Add(detectortarget);
+                targets.Add(detectortarget);
             }
         }
-        if(this.targets.Count>0)
+        if(targets.Count>0)
         {
-            return true;
+            return true;    
         }
         return false;
     }
 
     
-    public bool IsAttackable(IFactionMember unit,IHasPosition targetUnit,int attackRange,GridRangeShape attackShape = GridRangeShape.Circle)
+    private List<IHasPosition> ActionableFilter(List<IHasPosition> targets)
+    {
+        var detectortargets = new List<IHasPosition>();
+        foreach(var detectortarget in targets)//可接近性判断
+        {
+            if(IsActionable(unit as BaseUnit,detectortarget ,actionRange))
+            {
+                detectortargets.Add(detectortarget);
+            }
+        }
+        return detectortargets;
+    }
+    public bool IsActionable(IFactionMember unit,IHasPosition targetUnit,int attackRange,GridRangeShape attackShape = GridRangeShape.Circle)
     {
         List<Vector2Int> attackPositions = GridRange.Get(targetUnit.GridPos,attackRange,attackShape);
         
         foreach (Vector2Int pos in attackPositions)
         {
-            if (MovementRules.IsPreOccupyable(pos, unit)&&IsAttackable_Pos(mask,pos,targetUnit.GridPos,attackRange))
+            if (MovementRules.IsPreOccupyable(pos, unit)&&IsActionable_Pos(mask,pos,targetUnit.GridPos,attackRange))
             {
                 return true;
             }
@@ -224,7 +315,7 @@ public class IntentionDecision : MonoBehaviour
         return false;
     }
 
-    private bool IsAttackable_Pos(LayerMask mask,Vector2Int start,Vector2Int goal,int attackRange)//对于当前位置能否攻击到目标位置的判断
+    private bool IsActionable_Pos(LayerMask mask,Vector2Int start,Vector2Int goal,int attackRange)//对于当前位置能否对目标位置执行动作的判断,这里也就是视线的判断.
     {
         //检查是否在攻击范围内
         if (Vector2Int.Distance(start, goal) > attackRange)

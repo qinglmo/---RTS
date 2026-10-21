@@ -2,28 +2,28 @@ using UnityEngine;
 
 public class PhysicalWaterSurface : MonoBehaviour
 {
-    [Header("ÑªÁ¿")]
+    [Header("Ñªï¿½ï¿½")]
     [Range(0f, 1f)]
     public float health = 1f;
 
-    [Header("ÎïÀí²ÎÊý")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public int pointCount = 32;
-    public float springConstant = 100f;   // »Ö¸´Á¦ÏµÊý
-    public float tension = 50f;            // ±íÃæÕÅÁ¦ÏµÊý
-    public float damping = 5f;              // ×èÄá
+    public float springConstant = 100f;   // ï¿½Ö¸ï¿½ï¿½ï¿½Ïµï¿½ï¿½
+    public float tension = 50f;            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½
+    public float damping = 5f;              // ï¿½ï¿½ï¿½ï¿½
     public float maxVelocity = 10f;
 
-    [Header("³å»÷²ÎÊý")]
-    public float impactStrength = 5f;       // ³å»÷ËÙ¶È
-    public float impactSpread = 0.2f;        // ³å»÷ÇøÓò¿í¶È
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
+    public float impactStrength = 5f;       // ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+    public float impactSpread = 0.2f;        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-    [Header("±ß½ç·´µ¯")]
-    public float topBounce = 0.5f;           // Åö¶¥·´µ¯ÏµÊý
-    public float bottomBounce = 0.5f;         // Åöµ×·´µ¯ÏµÊý
+    [Header("ï¿½ß½ç·´ï¿½ï¿½")]
+    public float topBounce = 0.5f;           // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½
+    public float bottomBounce = 0.5f;         // ï¿½ï¿½ï¿½×·ï¿½ï¿½ï¿½Ïµï¿½ï¿½
 
-    private float[] y;        // Ïà¶Ô»ù×¼ÃæµÄÆ«ÒÆ
-    private float[] vy;       // ËÙ¶È
-    private float[] x;        // ¹éÒ»»¯Î»ÖÃ (0~1)
+    private float[] y;        // ï¿½ï¿½Ô»ï¿½×¼ï¿½ï¿½ï¿½Æ«ï¿½ï¿½
+    private float[] vy;       // ï¿½Ù¶ï¿½
+    private float[] x;        // ï¿½ï¿½Ò»ï¿½ï¿½Î»ï¿½ï¿½ (0~1)
     private Texture2D heightTex;
     private MaterialPropertyBlock propBlock;
     public SpriteRenderer sr;
@@ -34,7 +34,7 @@ public class PhysicalWaterSurface : MonoBehaviour
             sr = GetComponent<SpriteRenderer>();
         propBlock = new MaterialPropertyBlock();
         unit.attributes.OnHealthRateChanged += ChangeHealth;
-        // ³õÊ¼»¯ÖÊµã
+        // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Êµï¿½
         y = new float[pointCount];
         vy = new float[pointCount];
         x = new float[pointCount];
@@ -45,7 +45,7 @@ public class PhysicalWaterSurface : MonoBehaviour
             vy[i] = 0f;
         }
 
-        // ´´½¨1D¸ß¶ÈÎÆÀí
+        // ï¿½ï¿½ï¿½ï¿½1Dï¿½ß¶ï¿½ï¿½ï¿½ï¿½ï¿½
         heightTex = new Texture2D(pointCount, 1, TextureFormat.RFloat, false);
         heightTex.filterMode = FilterMode.Bilinear;
         heightTex.wrapMode = TextureWrapMode.Clamp;
@@ -59,7 +59,7 @@ public class PhysicalWaterSurface : MonoBehaviour
         {
             ChangeHealth(-0.1f);
         }
-        // ¼ÆËãºÏÁ¦
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         for (int i = 0; i < pointCount; i++)
         {
             float restore = -springConstant * y[i];
@@ -70,14 +70,14 @@ public class PhysicalWaterSurface : MonoBehaviour
             forces[i] = restore + tensionForce + damp;
         }
 
-        // ¸üÐÂËÙ¶ÈºÍÎ»ÖÃ
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶Èºï¿½Î»ï¿½ï¿½
         for (int i = 0; i < pointCount; i++)
         {
             vy[i] += forces[i] * dt;
             vy[i] = Mathf.Clamp(vy[i], -maxVelocity, maxVelocity);
             y[i] += vy[i] * dt;
 
-            // Åö×²´¦Àí£º¾ø¶Ô¸ß¶È²»ÄÜ³¬³ö[0,1]
+            // ï¿½ï¿½×²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¸ß¶È²ï¿½ï¿½Ü³ï¿½ï¿½ï¿½[0,1]
             float absHeight = health + y[i];
             if (absHeight > 1f)
             {
@@ -91,7 +91,7 @@ public class PhysicalWaterSurface : MonoBehaviour
             }
         }
 
-        // ¸üÐÂÎÆÀí
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         for (int i = 0; i < pointCount; i++)
         {
             float h = Mathf.Clamp01(health + y[i]);
@@ -99,7 +99,7 @@ public class PhysicalWaterSurface : MonoBehaviour
         }
         heightTex.Apply();
 
-        // ÉèÖÃ²ÄÖÊÊôÐÔ
+        // ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         sr.GetPropertyBlock(propBlock);
         propBlock.SetTexture("_HeightTex", heightTex);
         propBlock.SetFloat("_Fill", health);
@@ -109,9 +109,9 @@ public class PhysicalWaterSurface : MonoBehaviour
     public void ChangeHealth(float delta)
     {
         health = Mathf.Clamp01(health + delta);
-        if (delta < 0)  // ¿ÛÑªÊ±¼¤·¢³å»÷
+        if (delta < 0)  // ï¿½ï¿½ÑªÊ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         {
-            // Ëæ»úÑ¡Ôñ´Ó×ó¶Ë£¨0£©»òÓÒ¶Ë£¨1£©¿ªÊ¼
+            // ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½Ë£ï¿½0ï¿½ï¿½ï¿½ï¿½ï¿½Ò¶Ë£ï¿½1ï¿½ï¿½ï¿½ï¿½Ê¼
             int side = Random.Range(0, 2);
             float center = side == 0 ? 0f : 1f;
 
@@ -120,8 +120,8 @@ public class PhysicalWaterSurface : MonoBehaviour
                 float dist = Mathf.Abs(x[i] - center);
                 if (dist < impactSpread)
                 {
-                    float factor = 1f - dist / impactSpread;          // ¾àÀëË¥¼õ
-                    vy[i] += impactStrength * factor * Random.Range(0.9f, 1.1f); // ¼ÓÒ»µãËæ»úÈÃÃ¿´ÎÂÔÓÐ²»Í¬
+                    float factor = 1f - dist / impactSpread;          // ï¿½ï¿½ï¿½ï¿½Ë¥ï¿½ï¿½
+                    vy[i] += impactStrength * factor * Random.Range(0.9f, 1.1f); // ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½Ð²ï¿½Í¬
                 }
             }
         }

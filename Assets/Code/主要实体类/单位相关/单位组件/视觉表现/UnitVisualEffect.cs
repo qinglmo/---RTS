@@ -8,15 +8,33 @@ public class UnitVisualEffect : MonoBehaviour
 {
 
     public Transform unitImage_sprite;
-    // ÊÜ»÷¶¯»­Ğ­³Ì£¨Í¼Æ¬ÉÁË¸ºìÉ«²¢ÇáÎ¢Õğ¶¯£©
-    private Coroutine hitCoroutine;
-    Vector3 basePos = Vector3.zero; // Ö±½ÓÊ¹ÓÃÁãÎ»×÷Îª»ù×¼
 
-    private UnitAttributes attributes;  // ÒıÓÃÊôĞÔ×é¼ş
+    public Transform ChargeUp_sprite;
+    public SpriteRenderer ChargeUp_sr;
+    public Animator_Self animator;
+    // å—å‡»åŠ¨ç”»åç¨‹ï¼ˆå›¾ç‰‡é—ªçƒçº¢è‰²å¹¶è½»å¾®éœ‡åŠ¨ï¼‰
+    private Coroutine hitCoroutine;
+    Vector3 basePos = Vector3.zero; // ç›´æ¥ä½¿ç”¨é›¶ä½ä½œä¸ºåŸºå‡†
+
+    private UnitAttributes attributes;  // å¼•ç”¨å±æ€§ç»„ä»¶
+
+    //å„åŠ¨ç”»æ—¶é—´
+    public float chargeUpTime;
+    public float windupTime;
+    public float recoveryTime;
+    public float restTime;
 
     private void OnEnable()
     {
-        // »ñÈ¡Í¬ÎïÌå»ò¸¸ÎïÌåÉÏµÄ UnitAttributes ×é¼ş
+        if(animator == null)
+        {
+            animator = gameObject.AddComponent<Animator_Self>();
+        }
+        if(ChargeUp_sr != null)
+        {
+            ChargeUp_sr.material.SetFloat("_Progress", 1f);
+        }
+        // è·å–åŒç‰©ä½“æˆ–çˆ¶ç‰©ä½“ä¸Šçš„ UnitAttributes ç»„ä»¶
         attributes = GetComponentInParent<BaseUnit>().attributes;
         if (attributes != null)
         {
@@ -46,31 +64,35 @@ public class UnitVisualEffect : MonoBehaviour
         Color originalColor = spriteRenderer.color;
         Vector3 originalPos = unitImage_sprite.localPosition;
 
-        // ÉÁË¸ºìÉ«²¢ÇáÎ¢Æ«ÒÆ
+        // é—ªçƒçº¢è‰²å¹¶è½»å¾®åç§»
         float duration = 0.2f;
         float elapsed = 0f;
         while (elapsed < duration)
         {
-            // ÑÕÉ«ÔÚºìÉ«ºÍÔ­É«Ö®¼ä½»Ìæ
+            // é¢œè‰²åœ¨çº¢è‰²å’ŒåŸè‰²ä¹‹é—´äº¤æ›¿
             float t = elapsed / duration;
-            spriteRenderer.color = Color.Lerp(Color.red, originalColor, t * 2f); // ¿ìËÙ±äºìÔÙ»Ö¸´
-                                                                                 // ÇáÎ¢Õğ¶¯£ºËæ»úÆ«ÒÆ
+            spriteRenderer.color = Color.Lerp(Color.red, originalColor, t * 2f); // å¿«é€Ÿå˜çº¢å†æ¢å¤
+                                                                                 // è½»å¾®éœ‡åŠ¨ï¼šéšæœºåç§»
             unitImage_sprite.localPosition = originalPos + (Vector3)UnityEngine.Random.insideUnitCircle * 0.1f;
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        // »Ö¸´Ô­×´
+        // æ¢å¤åŸçŠ¶
         spriteRenderer.color = originalColor;
         unitImage_sprite.localPosition = basePos;
         hitCoroutine = null;
     }
     public void AttackWindup(Vector2 direction, float duration)
     {
+        if(duration <= 0f)
+            return;
         StartCoroutine(SmoothMoveImage((Vector2)unitImage_sprite.localPosition + direction*0.5f, duration));
     }
     public void AttackRecovery(float duration)
     {
+        if(duration <= 0f)
+            return;
         StartCoroutine(SmoothMoveImage(Vector2.zero, duration));
     }
     public IEnumerator SmoothMoveImage(Vector3 targetLocalPos, float duration)
@@ -86,4 +108,16 @@ public class UnitVisualEffect : MonoBehaviour
         }
         unitImage_sprite.localPosition = targetLocalPos;
     }
+    public void ChargeUp(float duration)
+    {
+        if(duration <= 0f)
+            return;
+        var animation = new ChargeUpAnimation(ChargeUp_sprite, ChargeUp_sr, duration);
+        animator.Play(animation);
+    }
+    public void InterruptAnimation()
+    {
+        animator.Stop();
+    }
+
 }

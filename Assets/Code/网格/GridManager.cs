@@ -77,9 +77,6 @@ public class GridManager : MonoBehaviour, IOccupyGridManager, ISnapToGrid, IGrid
     [Header("网格设置")]
     public Vector2 gridOrigin = Vector2.zero;   // 网格原点，比如 (0,0)
     public float gridSpacing = 1f;              // 网格间距，比如 1 个单位
-    // 网格边界（只读，可根据需要调整）
-    public static readonly int GridWidth = 30;          // 水平方向格子数
-    public static readonly int GridHeight = 30;         // 垂直方向格子数
 
     // ----------------------- 数据容器 -----------------------
     public static Dictionary<Vector2Int, BaseTerrain> CellsOfTerrain = new Dictionary<Vector2Int, BaseTerrain>();
@@ -175,8 +172,9 @@ public class GridManager : MonoBehaviour, IOccupyGridManager, ISnapToGrid, IGrid
         {
             //唉，还真是这个检查的问题，这也太阴了，浪费我那么多时间。忘记了友军穿过可能释放了其他单位的占用，下次就算想到了也要加注释，不然再下次可能忘记就删了。
             if(occupiedEnityInCells[gridPos] ==unit )//需要严格限制，否则容易出bug
-
+            {
                 occupiedEnityInCells.Remove(gridPos);
+            }
         }
     }
 

@@ -187,7 +187,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 873a3ca9054775f4bb050892043c4a64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defaultProductionTime: 3
   units:
   - {fileID: 11400000, guid: b626572ec67641a48b518bea2e1fdf09, type: 2}
   - {fileID: 11400000, guid: 4450c58abc6da1048811b9699abefb42, type: 2}
+  - {fileID: 11400000, guid: 3a071a55a2b77c941813bddea3c0339d, type: 2}
   ID: 0

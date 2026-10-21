@@ -100,7 +100,6 @@ GameObject:
   - component: {fileID: 4611726983633301569}
   - component: {fileID: 2819796845991326148}
   - component: {fileID: 7061471226419322668}
-  - component: {fileID: 7108487342586834002}
   m_Layer: 0
   m_Name: "\u666E\u901A\u8FD1\u6218\u5175"
   m_TagString: Enemy
@@ -185,18 +184,10 @@ MonoBehaviour:
   movement: {fileID: 0}
   attributes:
     rid: 5517520329517826066
-  detector: {fileID: 0}
+  intentionDecision: {fileID: 0}
   unitVisualEffect: {fileID: 0}
-  UnitCommander: {fileID: 0}
-  mainState: {fileID: 0}
-  behaviorTreeManager: {fileID: 0}
-  attackRange: 1
   selectSprite: {fileID: 0}
   StateSprite: {fileID: 1921409918359126505}
-  chaseRange_Advance: 5
-  chaseRange_Normal: 20
-  chaseRange_Current: 0
-  commandAttackTarget: {fileID: 0}
   references:
     version: 2
     RefIds:
@@ -267,6 +258,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitImage_sprite: {fileID: 893452763779260012}
+  ChargeUp_sprite: {fileID: 0}
+  ChargeUp_sr: {fileID: 0}
+  animator: {fileID: 0}
+  chargeUpTime: 0
+  windupTime: 0.1
+  recoveryTime: 0.1
+  restTime: 0.5
 --- !u!114 &2819796845991326148
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -279,10 +277,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08f2da8a8f18b0545a47ba270c624cf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scanRange: 20
-  scanInterval: 0.5
+  currentIntent: 3
+  chaseRange: 20
+  attackRange: 1
+  decisionInterval: 0.5
   checkInterval: 0.1
   minDistanceDifference: 1
+  decisionExecution: {fileID: 0}
 --- !u!114 &7061471226419322668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -307,23 +308,6 @@ MonoBehaviour:
   bottomBounce: 0.5
   sr: {fileID: 1202395701648325955}
   unit: {fileID: 8128118423647216666}
---- !u!114 &7108487342586834002
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6548986841845404856}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc3ccfae59a6e0b4f9ee87e48cc1f204, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  transitionRules: {fileID: 11400000, guid: e35a77c896d376d4a99c98da8fa56537, type: 2}
-  initializeState: 0
-  stunDuration: 0
-  main_State: 0
-  secondaryState: 0
 --- !u!1 &8885453552849075287
 GameObject:
   m_ObjectHideFlags: 0

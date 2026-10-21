@@ -12,7 +12,7 @@ public class DecisionExecution : MonoBehaviour
     BaseUnit unit;
     public void Init(BaseUnit unit)
     {
-        
+        this.unit=unit;
         stateMachine=new StateMachine(unit);
         stateMachine.Initialize(UnitState.Idle);
         
@@ -38,9 +38,10 @@ public class DecisionExecution : MonoBehaviour
                 var config=new ActionConfig();
                 config.action=action;
                 config.target=target;
-                config.windupTime=0.1f;
-                config.recoveryTime=0.1f;
-                config.restTime=0.5f;
+                config.chargeUpTime=unit.unitVisualEffect.chargeUpTime;
+                config.windupTime=unit.unitVisualEffect.windupTime;
+                config.recoveryTime=unit.unitVisualEffect.recoveryTime;
+                config.restTime=unit.unitVisualEffect.restTime;
                 state.SetActionConfig(config);
                 stateMachine.ResetCurrentState();//重置当前状态，重新执行动作
             }
@@ -51,9 +52,10 @@ public class DecisionExecution : MonoBehaviour
             var config=new ActionConfig();
             config.action=action;
             config.target=target;
-            config.windupTime=0.1f;
-            config.recoveryTime=0.1f;
-            config.restTime=0.5f;
+            config.chargeUpTime=unit.unitVisualEffect.chargeUpTime;
+            config.windupTime=unit.unitVisualEffect.windupTime;
+            config.recoveryTime=unit.unitVisualEffect.recoveryTime;
+            config.restTime=unit.unitVisualEffect.restTime;
             state.SetActionConfig(config);
             stateMachine.ChangeState(UnitState.ActionToTarget);//先设置参数再切换状态，避免切换状态时参数未设置
         }

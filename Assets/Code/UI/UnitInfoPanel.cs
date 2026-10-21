@@ -123,9 +123,9 @@ public class UnitInfoPanel : MonoBehaviour
                     break;
                 default:
                 {
-                    switch(IntentionState.currentIntent)
+                    switch(IntentionState.currentIntentStatus)
                     {
-                        case IntentionDecision.IntentType.Attack:
+                        case IntentionDecision.IntentStatus.Action:
                             {
                                 var target = IntentionState.CurrentTarget as MonoBehaviour;
                                 if (target != null)
@@ -138,7 +138,7 @@ public class UnitInfoPanel : MonoBehaviour
                                 }
                             }
                             break;
-                        case IntentionDecision.IntentType.Chase:
+                        case IntentionDecision.IntentStatus.Chase:
                             {
                                 var target = IntentionState.CurrentTarget as MonoBehaviour;
                                 if (target != null)
@@ -151,7 +151,7 @@ public class UnitInfoPanel : MonoBehaviour
                                 }
                             }
                             break;
-                        case IntentionDecision.IntentType.Find:
+                        case IntentionDecision.IntentStatus.Find:
                             {
                                 var target = IntentionState.CurrentTarget as MonoBehaviour;
                                 if (target != null)
@@ -164,7 +164,7 @@ public class UnitInfoPanel : MonoBehaviour
                                 }
                             }
                             break;
-                        case IntentionDecision.IntentType.Idle:statusText.text = "待机";
+                        case IntentionDecision.IntentStatus.Idle:statusText.text = "待机";
                             break;
                         default:statusText.text = "未知";
                             break;
