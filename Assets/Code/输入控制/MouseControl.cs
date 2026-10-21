@@ -200,7 +200,7 @@ public class MouseControl : MonoBehaviour
         if (GridManager.Instance.IsOccupied(grid))
         {
             // 尝试获取 UnitMove 组件
-            BaseUnit clickedUnit = GridManager.Instance.GetUnit(grid);
+            BaseUnit clickedUnit = GridEntityProvider.Instance.GetUnit(grid);
 
             if (clickedUnit != null)
             {
@@ -221,7 +221,7 @@ public class MouseControl : MonoBehaviour
                 }
                 return;
             }
-            BaseBuilding baseBuilding= GridManager.Instance.GetBuilding(grid);
+            BaseBuilding baseBuilding= GridEntityProvider.Instance.GetBuilding(grid);
             if (baseBuilding != null)
             {
                 Debug.Log("检测到建筑");

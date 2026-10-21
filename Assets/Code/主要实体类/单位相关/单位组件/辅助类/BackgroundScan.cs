@@ -26,18 +26,18 @@ public interface ITargetProvider
 //拆分接口细粒度，取决于使用者的使用程度，如果使用者只需要其中一个方法，那么应该拆分。后期查看代码时可以清晰理解使用者的意图。
 public interface IResourceProvider
 {
-    IEnumerable<IResource> GetAllResourceInCircle(List<Vector2Int> cells);
+    //IEnumerable<IResource> GetAllResourceInCircle(List<Vector2Int> cells);
 }
 public class BackgroundScan : MonoBehaviour, ITargetProvider,IResourceProvider
 {
-    private static GridManager gridManager;
-    private static GridManager GridManager
+    private static IGridEntityProvider entityProvider;
+    private static IGridEntityProvider EntityProvider
     {
         get
         {
-            if (gridManager == null)
-                gridManager = GridManager.Instance;
-            return gridManager;
+            if (entityProvider == null)
+                entityProvider = GridEntityProvider.Instance;
+            return entityProvider;
         }
     }
     /// <summary>
@@ -52,9 +52,7 @@ public class BackgroundScan : MonoBehaviour, ITargetProvider,IResourceProvider
        var targets = new List<IHasPosition>();
         foreach (var cell in cells)
         {
-            if (!GridManager.BoundsChecking(cell))
-                continue;
-            IFactionMember target = GridManager.GetFactionMember(cell);
+            IFactionMember target = EntityProvider.GetFactionMember(cell);
 
             if (target!=null)
             {
@@ -74,9 +72,7 @@ public class BackgroundScan : MonoBehaviour, ITargetProvider,IResourceProvider
         var targets = new List<IHasPosition>();
         foreach (var cell in cells)
         {
-            if (!GridManager.BoundsChecking(cell))
-                continue;
-            BaseUnit unit = GridManager.GetUnit(cell);
+            BaseUnit unit = EntityProvider.GetUnit(cell);
             
             if (unit != null)
             {
@@ -88,21 +84,6 @@ public class BackgroundScan : MonoBehaviour, ITargetProvider,IResourceProvider
         }
         return targets;
     }
-
-    public IEnumerable<IResource> GetAllResourceInCircle(List<Vector2Int> cells)
-    {
-        foreach (var cell in cells)
-        {
-            if (!GridManager.BoundsChecking(cell))
-                continue;
-            IResource resource = GridManager.GetResource(cell);
-            if (resource != null)
-            {
-                yield return resource;
-            }
-        }
-    }
-
 
 
 }

@@ -156,7 +156,7 @@ public class BuildingProduction : MonoBehaviour
             // 检查该格子是否已被占用
             if (GridManager.Instance.IsOccupied(neighbor))
             {
-                var unit = GridManager.Instance.GetUnit(neighbor);
+                var unit = GridEntityProvider.Instance.GetUnit(neighbor);
                 if (unit != null && unit.Faction == building.Faction)
                 {
                     unit.MoveToOther();

@@ -58,7 +58,7 @@ public class DragUnitHandler: SingletonMono<DragUnitHandler>
         }
     }
     private bool PickUpUnit(){
-        BaseUnit unit = GridManager.Instance.GetUnit(startPos);
+        BaseUnit unit = GridEntityProvider.Instance.GetUnit(startPos);
         if (unit == null)
             return false; // 没有单位不开始拖拽
 

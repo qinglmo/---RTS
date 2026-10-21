@@ -27,9 +27,9 @@ public static  class ActionCompleted
             case UnitAction.Help:
                 HelpAction(unit, target as BaseUnit);
                 break;
-            case UnitAction.Collect:
-                CollectAction(unit, target as IResource);
-                break;
+            // case UnitAction.Collect:
+            //     CollectAction(unit, target as IResource);
+            //     break;
             default:
                 break;
         }
@@ -47,9 +47,5 @@ public static  class ActionCompleted
     {
         target.attributes.Heal(1);//目前没有这个属性，所以只能临时处理为1
         SpecialEffectsManager.instance.CreateHealEffect(target,1);
-    }
-    private static void CollectAction(BaseUnit unit,IResource target)
-    {
-        //先放着，以后写
     }
 }

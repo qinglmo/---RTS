@@ -7,14 +7,24 @@ using UnityEngine;
 
 public class MovementRules
 {
-    private static GridManager gridManager;
-    private static GridManager GridManager
+    private static IGridEntityProvider entityProvider;
+    private static IGridEntityProvider EntityProvider//这个类是自带边界检查的，所以不需要再检查边界
     {
         get
         { 
-            if(gridManager==null)
-                gridManager = GridManager.Instance;
-            return gridManager;
+            if(entityProvider==null)
+                entityProvider = GridEntityProvider.Instance;
+            return entityProvider;
+        }
+    }
+    private static IGridPassableCheck gridPassableCheck;
+    private static IGridPassableCheck GridPassableCheck
+    {
+        get
+        { 
+            if(gridPassableCheck==null)
+                gridPassableCheck = GridManager.Instance;
+            return gridPassableCheck;
         }
     }
     /// <summary>
@@ -25,14 +35,11 @@ public class MovementRules
     /// <returns>true 表示可通行，false 表示不可通行</returns>
     public static bool IsWalkable(Vector2Int cell, BaseUnit self = null)
     {
-        // 1. 边界检查
-        if (!GridManager.BoundsChecking(cell))
-            return false;
         // 4. 实体占用判断，包括单位和建筑,自然地形
-        if (GridManager.IsOccupied(cell))
+        if (GridPassableCheck.IsOccupied(cell))
         {
             //如果被友军占领，依然视为可通行
-            if(self != null&& GridManager.GetUnit(cell)?.Faction==self.Faction)
+            if(self != null&& EntityProvider.GetUnit(cell)?.Faction==self.Faction)
                 return true;
             // 否则被其他单位占用 → 不可通行
             return false;
@@ -42,24 +49,18 @@ public class MovementRules
     }
     public static bool IsWalkable_Static(Vector2Int cell, BaseUnit self = null)//提供静态地图通行判断,忽略动态单位
     {
-        // 1. 边界检查
-        if (!GridManager.BoundsChecking(cell))
-            return false;
-        if(GridManager.IsOccupied_Static(cell))
+        if(GridPassableCheck.IsOccupied_Static(cell))
             return false;
         // 5. 无任何阻挡 → 可通行
         return true;
     }
     public static bool IsOccupyable(Vector2Int cell, IFactionMember self = null)
     {
-        // 1. 边界检查
-        if (!GridManager.BoundsChecking(cell))
-            return false;
         // 4. 单位占用判断
-        if (GridManager.IsOccupied(cell))
+        if (GridPassableCheck.IsOccupied(cell))
         {
             //自身占领认为可占领
-            if (self != null && GridManager.GetFactionMember(cell) == self)
+            if (self != null && EntityProvider.GetFactionMember(cell) == self)
                 return true;
             return false;
         }

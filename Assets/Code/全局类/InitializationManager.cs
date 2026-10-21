@@ -6,6 +6,6 @@ public class InitializationManager : MonoBehaviour
 
     void Start()
     {
-        GridWorldService.Instance.Initialize(GridManager.Instance, GridManager.Instance, GridManager.Instance);
+        GridWorldService.Instance.Initialize(GridManager.Instance, GridEntityProvider.Instance, GridManager.Instance);
     }
 }

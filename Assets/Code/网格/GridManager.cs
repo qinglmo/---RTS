@@ -30,24 +30,16 @@ public interface IGridPassableCheck
 {
     public bool IsOccupied(Vector2Int gridPos);
     public bool BoundsChecking(Vector2Int gridPos);
+
+    public bool IsOccupied_Static(Vector2Int gridPos);
 }
 
-public interface IGridEntityProvider
-{
-    public IFactionMember GetFactionMember(Vector2Int pos);
-    public BaseUnit GetUnit(Vector2Int pos);
-    public BaseBuilding GetBuilding(Vector2Int pos);
-    public IResource GetResource(Vector2Int pos);
-}
 
-public interface IRegisterEntity //注册资源，地形
-{
-    public bool TryRegisterResource(Vector2Int grid, IResource resource);
-}
+
 
 // ======================= GridManager 实现 =======================
 
-public class GridManager : MonoBehaviour, IOccupyGridManager, ISnapToGrid, IGridPassableCheck, IGridEntityProvider, IRegisterEntity
+public class GridManager : MonoBehaviour, IOccupyGridManager, ISnapToGrid, IGridPassableCheck
 {
     // ----------------------- 单例 -----------------------
     private static GridManager instance;
@@ -70,7 +62,7 @@ public class GridManager : MonoBehaviour, IOccupyGridManager, ISnapToGrid, IGrid
     }
     [Header("Tilemap 图层")]
     [SerializeField] public Tilemap terrainTilemap;      // 地形（用于计算边界）
-
+    public Tilemap resourceTilemap;//地表
     public Grid grid;
 
     // ----------------------- 网格配置 -----------------------
@@ -79,50 +71,17 @@ public class GridManager : MonoBehaviour, IOccupyGridManager, ISnapToGrid, IGrid
     public float gridSpacing = 1f;              // 网格间距，比如 1 个单位
 
     // ----------------------- 数据容器 -----------------------
-    public static Dictionary<Vector2Int, BaseTerrain> CellsOfTerrain = new Dictionary<Vector2Int, BaseTerrain>();
-    private Dictionary<Vector2Int, IResource> resources = new Dictionary<Vector2Int, IResource>();
     private Dictionary<Vector2Int, IOccupyEnity> occupiedEnityInCells = new Dictionary<Vector2Int, IOccupyEnity>();
     private HashSet<BaseUnit> unitOccupied = new HashSet<BaseUnit>(); // 表示单位是否处于占用状态，非占用状态必须处于移动状态。
 
     // ----------------------- IGridEntityProvider 实现 -----------------------
-    public IFactionMember GetFactionMember(Vector2Int pos)
-    {
-        if(!BoundsChecking(pos))
-            return null;
-        if(occupiedEnityInCells.ContainsKey(pos))
-        {
-            return occupiedEnityInCells[pos] as IFactionMember;
-        }
-        return null;
-    }
-
-    public BaseUnit GetUnit(Vector2Int pos)
+    public IOccupyEnity GetOccupiedEnity(Vector2Int pos)
     {
         if (!BoundsChecking(pos))
             return null;
-        if(occupiedEnityInCells.ContainsKey(pos))
+        if (occupiedEnityInCells.ContainsKey(pos))
         {
-            return occupiedEnityInCells[pos] as BaseUnit;
-        }
-        return null;
-    }
-
-    public BaseBuilding GetBuilding(Vector2Int pos)
-    {
-        if (!BoundsChecking(pos))
-            return null;
-        if(occupiedEnityInCells.ContainsKey(pos))
-        {
-            return occupiedEnityInCells[pos] as BaseBuilding;
-        }
-        return null;
-    }
-
-    public IResource GetResource(Vector2Int pos)
-    {
-        if (resources.ContainsKey(pos))
-        {
-            return resources[pos];
+            return occupiedEnityInCells[pos];
         }
         return null;
     }
@@ -178,17 +137,6 @@ public class GridManager : MonoBehaviour, IOccupyGridManager, ISnapToGrid, IGrid
         }
     }
 
-    // ----------------------- IRegisterEntity 实现 -----------------------
-    public bool TryRegisterResource(Vector2Int grid, IResource resource)
-    {
-        if (resources.ContainsKey(grid))
-        {
-            return false;
-        }
-        resources[grid] = resource;
-        return true;
-    }
-
     // ----------------------- IGridPassableCheck 实现 -----------------------
     /// <summary>
     /// 检查格子是否被占用（可选）被占用返回true
@@ -212,7 +160,7 @@ public class GridManager : MonoBehaviour, IOccupyGridManager, ISnapToGrid, IGrid
         {
             if(occupiedEnityInCells[gridPos] is BaseBuilding)
                 return true;
-            if(occupiedEnityInCells[gridPos] is Mountain)
+            if(occupiedEnityInCells[gridPos] is SurfaceResources)
                 return true;
         }
         return false;

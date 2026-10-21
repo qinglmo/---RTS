@@ -72,7 +72,7 @@ public class GridWorldService : MonoBehaviour, IMoveApplyWorld
     }
     public bool IsOccupy(BaseUnit unit)
     {
-        if(GridManager.Instance.GetUnit(unit.GridPos)==unit)//我竟然没想到还能这样,还是AI厉害
+        if(GridEntityProvider.Instance.GetUnit(unit.GridPos)==unit)//我竟然没想到还能这样,还是AI厉害
             return true;
         return false;
     }

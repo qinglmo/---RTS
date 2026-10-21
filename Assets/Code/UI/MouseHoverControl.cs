@@ -83,7 +83,7 @@ public class MouseHoverControl : MonoBehaviour
         if(!GridManager.Instance.BoundsChecking(grid))
             return;
         FloatingPanelController.Instance.Show();
-        FloatingPanel.Instance.UpdateInfo(grid,GridManager.Instance.GetFactionMember(grid));
+        FloatingPanel.Instance.UpdateInfo(grid,GridEntityProvider.Instance.GetFactionMember(grid));
 
     }
     private void OnHoverCancel()
