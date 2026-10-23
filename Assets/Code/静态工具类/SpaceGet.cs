@@ -13,6 +13,20 @@ public static class SpaceGet
             new Vector2Int(cell.x, cell.y - 1)
         };
     }
+    public static List<Vector2Int> GetNeighbors_8(Vector2Int cell)//八邻域
+    {
+        return new List<Vector2Int>
+        {
+            new Vector2Int(cell.x + 1, cell.y + 1),
+            new Vector2Int(cell.x + 1, cell.y - 1),
+            new Vector2Int(cell.x + 1, cell.y),
+            new Vector2Int(cell.x, cell.y + 1),
+            new Vector2Int(cell.x, cell.y - 1),
+            new Vector2Int(cell.x - 1, cell.y + 1),
+            new Vector2Int(cell.x - 1, cell.y - 1),
+            new Vector2Int(cell.x - 1, cell.y),
+        };
+    }
     public static IEnumerable<Vector2Int>  GetCellsInCircle(Vector2Int center, float radius)
     {
         // 计算需要检查的格子范围（基于半径 / 格子大小，向上取整）

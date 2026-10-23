@@ -62,7 +62,6 @@ public class IntentionDecision : MonoBehaviour
     private IFactionMember unit;
     public event Action<IHasPosition> OnTargetChanged;
 
-    private ITargetProvider targetProvider;
     private ITargetFiltering targetFiltering;
     private ITargetEvaluation targetEvaluation;
     
@@ -71,7 +70,6 @@ public class IntentionDecision : MonoBehaviour
     private void Awake()
     {
         unit = GetComponent<BaseUnit>();
-        targetProvider = GetComponent<ITargetProvider>() ?? gameObject.AddComponent<BackgroundScan>();
         targetFiltering = GetComponent<ITargetFiltering>() ?? gameObject.AddComponent<ViewFiltering>();
         targetEvaluation = GetComponent<ITargetEvaluation>() ?? gameObject.AddComponent<BrainDecision>();
         mask = LayerMask.GetMask("Mountain", "Building");
@@ -204,11 +202,11 @@ public class IntentionDecision : MonoBehaviour
         var targets = new List<IHasPosition>();
         switch (intentType)
         {
-            case IntentType.Attack:targets= targetProvider.GetAllTargetsInRange(unit.Faction.enemies[0], cells);
+            case IntentType.Attack:targets= BackgroundScan.GetAllTargetsInRange(unit.Faction.enemies[0], cells);
                 break;
             case IntentType.Help:
                 {
-                    targets= targetProvider.GetAllTargetsInRange(unit.Faction, cells);
+                    targets= BackgroundScan.GetUnitTargetsInRange(unit.Faction, cells);
                 }
                 break;
             default:

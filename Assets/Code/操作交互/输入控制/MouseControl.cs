@@ -201,7 +201,6 @@ public class MouseControl : MonoBehaviour
         {
             // 尝试获取 UnitMove 组件
             BaseUnit clickedUnit = GridEntityProvider.Instance.GetUnit(grid);
-
             if (clickedUnit != null)
             {
                 if (shiftHeld)
@@ -225,6 +224,7 @@ public class MouseControl : MonoBehaviour
             if (baseBuilding != null)
             {
                 Debug.Log("检测到建筑");
+                UnitInfoPanel.Instance.UpdateInfo(baseBuilding);
                 if(baseBuilding is BuildingHospital)
                 {
                     var hospital= (BuildingHospital)baseBuilding;
@@ -239,7 +239,12 @@ public class MouseControl : MonoBehaviour
                     ProductionQueuePanel.Instance.Show();
                 }
             }
-
+            SurfaceResources surfaceResources= GridEntityProvider.Instance.GetResource(grid);
+            if (surfaceResources != null)
+            {
+                Debug.Log("检测到资源");
+                UnitInfoPanel.Instance.UpdateInfo(surfaceResources);
+            }
         }
         else
         {

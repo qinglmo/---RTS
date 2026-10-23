@@ -10,8 +10,6 @@ public class Unit : BaseUnit
     public GameObject bulletPrefab;
     public Transform firePoint;
 
-    public Transform ChargeUp_sprite;
-
     
     protected override void Awake()
     {

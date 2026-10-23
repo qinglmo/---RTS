@@ -6,11 +6,9 @@ public class BuildingSystem : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private GridManager grid;         // 你的网格类组件
-    [SerializeField] private float groundPlaneY = 0f; // 地面平面高度（假设Y轴向上）
-    [SerializeField] private LayerMask groundLayer;    // 用于射线检测（可选）
-
     private Camera mainCamera;
-    private GameObject ghostBuilding;               // 当前跟随鼠标的虚化建筑
+    private GameObject imageObj;               // 当前跟随鼠标的建筑图片
+    private SpriteRenderer imageRenderer;
     private BuildingData selectedPrefab;              // 当前选中的建筑预制体
     private bool isBuilding = false;                 // 是否处于建造模式
 
@@ -24,13 +22,19 @@ public class BuildingSystem : MonoBehaviour
     {
         grid = GridManager.Instance;
         mainCamera=Camera.main;
+        if (imageObj == null)
+        {
+            imageObj = new GameObject("BuildingImage");
+        }
+        imageRenderer=imageObj.AddComponent<SpriteRenderer>();
+        imageObj.SetActive(false);
     }
     private void Update()
     {
         if (!isBuilding) return;
 
-        // 1. 更新虚化建筑位置（对齐网格）
-        UpdateGhostPosition();
+        // 1. 更新建筑图片位置（对齐网格）
+        UpdateImagePosition();
 
         // 2. 检测输入
         if (Input.GetMouseButtonDown(0)) // 左键放置
@@ -58,61 +62,23 @@ public class BuildingSystem : MonoBehaviour
         // 如果已经在建造，先取消当前建造
         if (isBuilding) CancelBuilding();
 
+        imageObj.SetActive(true);
+        imageRenderer.sprite=prefab.icon;
         selectedPrefab = prefab;
-
-        // 实例化虚化建筑（半透明、无碰撞）
-        ghostBuilding = Instantiate(selectedPrefab.prefab);
-        var building = ghostBuilding.GetComponent<BaseBuilding>();
-        if (building != null)
-        {
-            building.Initialize();//抢先初始化，避免虚化建筑占用世界
-        }
-        SetupGhost(ghostBuilding);
-
         isBuilding = true;
     }
 
-    /// <summary>
-    /// 将普通建筑设置为虚化状态
-    /// </summary>
-    private void SetupGhost(GameObject ghost)
-    {
-        // 设置所有材质半透明（alpha = 0.5）
-        Renderer[] renderers = ghost.GetComponentsInChildren<Renderer>();
-        foreach (Renderer renderer in renderers)
-        {
-            Material[] mats = renderer.materials;
-            foreach (Material mat in mats)
-            {
-                if (mat.HasProperty("_Color"))
-                {
-                    Color c = mat.color;
-                    c.a = 0.5f;
-                    mat.color = c;
-                }
-                // 可进一步设置渲染模式为透明，此处简化
-            }
-            renderer.materials = mats;
-        }
-
-        // 禁用所有碰撞器，避免干扰射线检测
-        Collider[] colliders = ghost.GetComponentsInChildren<Collider>();
-        foreach (Collider col in colliders) col.enabled = false;
-
-        // 可选：设置图层为Ignore Raycast，防止阻挡自身射线
-        ghost.layer = LayerMask.NameToLayer("Ignore Raycast");
-    }
 
     /// <summary>
-    /// 更新虚化建筑的位置，使其对齐网格
+    /// 更新建筑图片的位置，使其对齐网格
     /// </summary>
-    private void UpdateGhostPosition()
+    private void UpdateImagePosition()
     {
         Vector3 mouseWorldPos = GetMouseWorldPositionOnPlane();
         // 转换为网格坐标并获取对齐后的世界坐标
         Vector2Int cell = grid.WorldToCell(mouseWorldPos);
         Vector3 snappedPos = grid.CellToWorld(cell);
-        ghostBuilding.transform.position = snappedPos;
+        imageObj.transform.position = snappedPos;
     }
 
     /// <summary>
@@ -131,7 +97,8 @@ public class BuildingSystem : MonoBehaviour
     /// </summary>
     private void TryPlaceBuilding()
     {
-        if (!CanPlace(grid.WorldToCell(ghostBuilding.transform.position)))
+        var pos = grid.WorldToCell(imageObj.transform.position);
+        if (!CanPlace(pos))
         {
             Debug.Log("此处无法建造！");
             return;
@@ -142,18 +109,16 @@ public class BuildingSystem : MonoBehaviour
             Debug.Log("资源不足！");
             return;
         }
-        // 实例化真实建筑
-        GameObject newBuilding = Instantiate(selectedPrefab.prefab, ghostBuilding.transform.position, ghostBuilding.transform.rotation);
-        
-        // 调用建筑的初始化方法（假设建筑上有 IBuilding 接口）
-        IBuilding buildingComp = newBuilding.GetComponent<IBuilding>();
-        if (buildingComp != null)
+        //设置建筑Tile
+        grid.SetSurfaceTile(pos, selectedPrefab.buildingTile);
+        //获取Tile实体
+        var Building = grid.GetInstantiatedObject(pos);
+        if(Building!=null)
         {
-            buildingComp.Initialize(ghostBuilding.transform.position);
+            // 目前没有初始化需求
         }
-
         // 建造成功，退出建造模式
-        //CancelBuilding();
+        CancelBuilding();
     }
 
     /// <summary>
@@ -168,32 +133,20 @@ public class BuildingSystem : MonoBehaviour
             return !grid.IsOccupied(position);
         }
 
-        // 备选方案：使用Physics.CheckSphere检测碰撞（需要建筑有碰撞体）
-        // float checkRadius = 0.1f;
-        // return !Physics.CheckSphere(position, checkRadius, obstacleLayer);
-
         // 默认允许（需根据实际情况修改）
         return true;
     }
 
     /// <summary>
-    /// 取消建造，清理虚化建筑
+    /// 取消建造
     /// </summary>
     private void CancelBuilding()
     {
-        if (ghostBuilding != null)
+        if (imageObj != null)
         {
-            Destroy(ghostBuilding);
+            imageObj.SetActive(false);
         }
         isBuilding = false;
         selectedPrefab = null;
     }
-}
-
-/// <summary>
-/// 可选接口，建筑实现此接口以接收初始化调用
-/// </summary>
-public interface IBuilding
-{
-    void Initialize(Vector3 position);
 }

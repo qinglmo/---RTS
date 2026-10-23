@@ -62,7 +62,7 @@ public class GridManager : MonoBehaviour, IOccupyGridManager, ISnapToGrid, IGrid
     }
     [Header("Tilemap 图层")]
     [SerializeField] public Tilemap terrainTilemap;      // 地形（用于计算边界）
-    public Tilemap resourceTilemap;//地表
+    public Tilemap surfaceTilemap;//地表
     public Grid grid;
 
     // ----------------------- 网格配置 -----------------------
@@ -85,7 +85,31 @@ public class GridManager : MonoBehaviour, IOccupyGridManager, ISnapToGrid, IGrid
         }
         return null;
     }
-
+    public TileBase GetTerrainTile(Vector2Int pos)
+    {
+        if (!BoundsChecking(pos))
+            return null;
+        return terrainTilemap.GetTile((Vector3Int)pos);
+    }
+    public TileBase GetSurfaceTile(Vector2Int pos)
+    {
+        if (!BoundsChecking(pos))
+            return null;
+        return surfaceTilemap.GetTile((Vector3Int)pos);
+    }
+    public GameObject GetInstantiatedObject(Vector2Int pos)
+    {
+        if (!BoundsChecking(pos))
+            return null;
+        return surfaceTilemap.GetInstantiatedObject((Vector3Int)pos);
+    }
+    public void SetSurfaceTile(Vector2Int pos, TileBase tile)
+    {
+        if (!BoundsChecking(pos))
+            return;
+        surfaceTilemap.SetTile((Vector3Int)pos, tile);
+    }
+    
     // ----------------------- IOccupyGridManager 实现 -----------------------
     public void ClearOccupyGrid(BaseUnit unit)
     {

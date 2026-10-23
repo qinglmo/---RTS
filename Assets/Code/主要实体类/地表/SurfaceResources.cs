@@ -28,7 +28,7 @@ public class SurfaceResources : MonoBehaviour, IOccupyEnity
             if (GridManager.Instance.TryOccupy(grid, this))
             {
                 currentGrid = grid;
-                transform.position = GridManager.Instance.CellToWorld(grid); 
+                transform.position = GridManager.Instance.CellToWorld(grid); //其实已经不需要了
             }
         }
     }

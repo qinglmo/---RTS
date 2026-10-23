@@ -53,7 +53,6 @@ public class BaseBuilding : MonoBehaviour, IFactionMember, IOccupyEnity
                 transform.position = new Vector3(currentGrid.Value.x, currentGrid.Value.y, 0);
             }
         }
-        GetComponent<SpriteRenderer>().color = faction.factionColor;
         gameObject.tag = faction.factionTag;
     }
     protected virtual void Start()
@@ -69,11 +68,10 @@ public class BaseBuilding : MonoBehaviour, IFactionMember, IOccupyEnity
                 transform.position = GridManager.CellToWorld(grid);
             }
         }
-        GetComponent<SpriteRenderer>().color=faction.factionColor;
-        gameObject.tag=faction.factionTag;
+        gameObject.tag = faction.factionTag;
     }
 
-    private void OnDestroy()
+    protected virtual void OnDestroy()
     {
         if(currentGrid != null)
             GridManager.Release((Vector2Int)currentGrid,this);

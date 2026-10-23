@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 [System.Serializable]
 public class BuildingData
 {
     public string buildingName;
-    public GameObject prefab;      // 建筑预制体
+    public TileBase buildingTile; // 建筑Tile
     public int foodCost;
     public int woodCost;
     public int stoneCost;
